@@ -1,0 +1,252 @@
+# Implementation Plan: Product Showcase
+
+## Overview
+
+Incremental implementation of the Bella Forme Group product showcase system on the existing Laravel 12 + React 19 (Inertia.js) application. Tasks are ordered to build the database layer first, then backend CRUD, then public frontend, then cross-cutting concerns (SEO, email, image optimization). PHP (Laravel) for backend, TypeScript (React) for frontend, Pest for PHP tests, Vitest + fast-check for frontend tests.
+
+## Tasks
+
+- [x] 1. Database migrations and Eloquent models
+  - [x] 1.1 Create migrations for divisions, categories, brands, products, product_images, product_specifications, contact_messages, homepage_settings, seo_metadata, and email_settings tables
+    - Define all columns, foreign keys, indexes, and unique constraints as specified in the design ERD
+    - _Requirements: 1.1, 2.1, 3.1, 4.1, 8.1, 10.1, 12.1, 13.1, 14.1_
+  - [x] 1.2 Create Eloquent models: Division, Category, Brand, Product, ProductImage, ProductSpecification, ContactMessage, HomepageSetting, SeoMetadata, EmailSetting
+    - Define fillable, casts, relationships (belongsTo, hasMany, morphOne)
+    - Add `scopeActive()` and `scopeDetailed()` to Product model
+    - Add `scopeActive()` to Division, Category
+    - _Requirements: 1.1, 2.1, 3.1, 4.1, 8.1_
+  - [x] 1.3 Create HasSlug trait in app/Concerns/HasSlug.php
+    - Auto-generate slug from name on `creating` event when slug is empty
+    - Apply trait to Division, Category, Brand, Product models
+    - _Requirements: 1.3, 2.3, 3.3, 4.6_
+  - [x] 1.4 Create HasSeo trait in app/Concerns/HasSeo.php
+    - Provide `seo()` morphOne relationship to SeoMetadata
+    - Provide `getSeoData()` method with fallback defaults (name → meta_title, etc.)
+    - Apply trait to Division, Category, Product models
+    - _Requirements: 12.3, 12.4, 12.6_
+  - [x] 1.5 Write property test for slug auto-generation (Property 1)
+    - **Property 1: Slug auto-generation from name**
+    - **Validates: Requirements 1.3, 2.3, 3.3, 4.6**
+  - [x] 1.6 Write property test for active-only filtering with ordering (Property 2)
+    - **Property 2: Active-only filtering with correct ordering**
+    - **Validates: Requirements 1.4, 2.4, 6.5**
+  - [x] 1.7 Write property test for SEO metadata fallback defaults (Property 14)
+    - **Property 14: SEO metadata fallback defaults**
+    - **Validates: Requirements 12.6**
+
+- [x] 2. Image optimization service
+  - [x] 2.1 Install Intervention Image package (`intervention/image`) and configure
+    - _Requirements: 14.1_
+  - [x] 2.2 Create ImageOptimizer service in app/Services/ImageOptimizer.php
+    - Implement `optimize(UploadedFile, string $path): string` that stores original and generates WebP at thumbnail (150px), medium (600px), large (1200px)
+    - Implement `delete(string $path)` that removes original and all optimized versions
+    - Use naming convention: `{filename}-thumb.webp`, `{filename}-medium.webp`, `{filename}-large.webp`
+    - _Requirements: 14.1, 14.3, 14.4_
+  - [x] 2.3 Create HasOptimizedImages trait in app/Concerns/HasOptimizedImages.php
+    - Provide helper methods for retrieving optimized image URLs from a stored path
+    - _Requirements: 14.1, 14.2_
+  - [x] 2.4 Write property test for image optimization sizes (Property 20)
+    - **Property 20: Image optimization generates all required sizes**
+    - **Validates: Requirements 14.1**
+  - [x] 2.5 Write property test for image deletion cleanup (Property 21)
+    - **Property 21: Image deletion removes all optimized versions**
+    - **Validates: Requirements 14.4**
+
+- [x] 3. Admin CRUD — Divisions, Categories, Brands
+  - [x] 3.1 Create admin route group in routes/web.php with auth middleware under /admin prefix
+    - _Requirements: 1.1, 2.1, 3.1_
+  - [x] 3.2 Create Admin\DivisionController with resource routes (index, create, store, edit, update, destroy)
+    - Create StoreDivisionRequest and UpdateDivisionRequest form requests with validation
+    - Handle hero_image upload via ImageOptimizer
+    - Include SEO metadata fields in create/edit forms
+    - _Requirements: 1.1, 1.2, 12.1_
+  - [x] 3.3 Create React admin pages for divisions: pages/admin/divisions/index.tsx, create.tsx, edit.tsx
+    - Use existing shadcn/ui components (Input, Button, Card, Label)
+    - Include SEO metadata fields section
+    - _Requirements: 1.1, 1.2, 12.1_
+  - [x] 3.4 Create Admin\CategoryController with resource routes
+    - Create StoreCategoryRequest and UpdateCategoryRequest form requests
+    - Handle image upload via ImageOptimizer
+    - Include SEO metadata fields
+    - _Requirements: 2.1, 2.2, 12.1_
+  - [x] 3.5 Create React admin pages for categories: index.tsx, create.tsx, edit.tsx
+    - Division selector dropdown
+    - _Requirements: 2.1, 2.2_
+  - [x] 3.6 Create Admin\BrandController with resource routes
+    - Create StoreBrandRequest and UpdateBrandRequest form requests
+    - Handle logo upload via ImageOptimizer
+    - _Requirements: 3.1, 3.2_
+  - [x] 3.7 Create React admin pages for brands: index.tsx, create.tsx, edit.tsx
+    - Include is_partner and is_reference toggles
+    - _Requirements: 3.1, 3.2_
+
+- [x] 4. Checkpoint — Verify migrations, models, and admin CRUD for divisions/categories/brands
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 5. Admin CRUD — Products with conditional form
+  - [x] 5.1 Create StoreProductRequest and UpdateProductRequest form requests
+    - Implement conditional validation: description required_if content_mode=detailed, brochure_file required_if content_mode=brochure_only
+    - Strip specifications and gallery data in prepareForValidation when content_mode=brochure_only
+    - Validate content_mode in:detailed,brochure_only
+    - _Requirements: 4.2, 4.3, 4.5, 5.1, 5.2, 5.3, 5.4_
+  - [x] 5.2 Create Admin\ProductController with resource routes
+    - Handle featured_image and brochure_file uploads via ImageOptimizer
+    - Sync specifications (create/update/delete ProductSpecification records)
+    - Sync gallery images (create/delete ProductImage records with ordering)
+    - Include SEO metadata fields
+    - _Requirements: 4.1, 4.7, 4.8, 12.1_
+  - [x] 5.3 Create React admin product pages: index.tsx, create.tsx, edit.tsx
+    - ProductTypeSelector component toggling between "Full Product" and "Catalog Only"
+    - Dynamic form: show/hide description, video_url, SpecificationsEditor, GalleryUploader based on content_mode
+    - SpecificationsEditor: ordered list of label/value pairs with add/remove/reorder
+    - GalleryUploader: multi-image upload with preview and reorder
+    - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.7, 4.8_
+  - [x] 5.4 Write property test for content-mode conditional validation (Property 3)
+    - **Property 3: Content-mode conditional validation**
+    - **Validates: Requirements 4.2, 4.3, 5.1, 5.2**
+  - [x] 5.5 Write property test for content_mode enum validation (Property 4)
+    - **Property 4: Content_mode enum validation**
+    - **Validates: Requirements 5.4**
+  - [x] 5.6 Write property test for brochure_only strips specs/gallery (Property 5)
+    - **Property 5: Brochure_only strips specifications and gallery**
+    - **Validates: Requirements 5.3**
+
+- [x] 6. API endpoints for product listing and detail
+  - [x] 6.1 Create Api\ProductController with index and show methods
+    - GET /api/products?category=slug&brand=slug → return active products with fields: id, name, slug, content_mode, featured_image, short_description, brochure_file
+    - GET /api/product/{slug} → return full product data for detailed products, 404 for brochure_only
+    - Register routes in routes/api.php
+    - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
+  - [x] 6.2 Write property test for brochure_only 404 (Property 6)
+    - **Property 6: Brochure_only products return 404 on detail endpoint**
+    - **Validates: Requirements 7.3, 10.4**
+  - [x] 6.3 Write property test for product listing filters (Property 8)
+    - **Property 8: Product listing with category and brand filters**
+    - **Validates: Requirements 6.6, 10.1, 10.2**
+  - [x] 6.4 Write property test for API detail completeness (Property 10)
+    - **Property 10: API product detail returns complete data for detailed products**
+    - **Validates: Requirements 10.3**
+  - [x] 6.5 Write property test for JSON round-trip (Property 11)
+    - **Property 11: Product JSON serialization round-trip**
+    - **Validates: Requirements 10.5**
+
+- [x] 7. Checkpoint — Verify product CRUD and API endpoints
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [x] 8. Public frontend — Layout, navigation, homepage
+  - [x] 8.1 Create public layout component with navigation bar (division links, "Contactez-nous", logo) and footer (three columns, social media, newsletter)
+    - Share active divisions via HandleInertiaRequests middleware
+    - _Requirements: 9.3_
+  - [x] 8.2 Create SeoHead component using Inertia's `<Head>`
+    - Render title, meta description, og:title, og:description, og:image, canonical URL
+    - _Requirements: 12.3, 12.4, 12.5, 12.7_
+  - [x] 8.3 Create OptimizedImage component
+    - Render `<picture>` with WebP `<source>` and `srcset` for responsive sizes
+    - Support `loading="lazy"` prop
+    - _Requirements: 14.2, 14.5_
+  - [x] 8.4 Create homepage page (pages/home.tsx)
+    - Hero section with background image and tagline
+    - Division showcase sections with "Découvrir" buttons
+    - Stats section with key figures
+    - Wire to HomeController
+    - _Requirements: 10.1, 10.2, 10.3_
+
+- [x] 9. Public frontend — Division and category pages
+  - [x] 9.1 Create division page (pages/division/show.tsx)
+    - Hero section, category grid with CategoryCard components and "Explorer" buttons
+    - BrandCarousel for "Nos Références" (is_reference brands) and "Nos Marques Partenaires" (is_partner brands)
+    - Wire to Public\DivisionController
+    - _Requirements: 9.1, 9.2, 3.4, 3.5_
+  - [x] 9.2 Create category page (pages/category/show.tsx)
+    - Category hero, BrandFilter dropdown, product grid with ProductCard components
+    - ProductCard: conditional "En savoir plus" (detailed) or "Voir la brochure" (brochure_only) buttons
+    - Wire to Public\CategoryController, fetch products via API with brand filter
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
+  - [x] 9.3 Write property test for division brand carousels (Property 9)
+    - **Property 9: Division page brand carousels filter correctly**
+    - **Validates: Requirements 3.4, 3.5**
+  - [x] 9.4 Write property test for ProductCard rendering (Property 7)
+    - **Property 7: ProductCard conditional rendering**
+    - **Validates: Requirements 6.2, 6.3, 6.4**
+
+- [x] 10. Public frontend — Single product page
+  - [x] 10.1 Create product detail page (pages/product/show.tsx)
+    - Featured image, gallery, description, "Demander un devis" button
+    - Tabbed sections: "Caractéristiques Techniques" (specs table), "Catalogue / Brochure" (brochure download)
+    - Embedded video player when video_url is present
+    - JsonLdProduct structured data component
+    - Wire to Public\ProductController (404 for brochure_only)
+    - _Requirements: 7.1, 7.2, 7.3, 7.4, 12.8_
+  - [x] 10.2 Write property test for SEO meta tags (Property 15)
+    - **Property 15: SEO meta tags rendered on public pages**
+    - **Validates: Requirements 12.3, 12.4**
+  - [x] 10.3 Write property test for JSON-LD structured data (Property 16)
+    - **Property 16: Product JSON-LD structured data**
+    - **Validates: Requirements 12.8**
+
+- [x] 11. Contact form and email
+  - [x] 11.1 Create contact page (pages/contact.tsx) with ContactForm component
+    - Fields: name, phone, email, city, activity_type, project_nature, equipment_timeline, request_reason, message
+    - Support pre-filled product_id from "Demander un devis" link
+    - Display confirmation message on success
+    - Wire to Public\ContactController (store action)
+    - _Requirements: 8.1, 8.2, 8.3, 8.4_
+  - [x] 11.2 Create StoreContactMessageRequest form request
+    - Validate name, email (required, valid email), message (required)
+    - _Requirements: 8.2_
+  - [x] 11.3 Create DynamicSmtpService in app/Services/DynamicSmtpService.php
+    - Read EmailSettings from database, configure Laravel mailer at runtime
+    - _Requirements: 13.1, 13.5_
+  - [x] 11.4 Create ContactFormNotification Mailable
+    - Send notification email on contact form submission using DynamicSmtpService
+    - Wrap in try/catch: log error on failure, do not fail the request
+    - _Requirements: 13.5, 13.6_
+  - [x] 11.5 Write property test for contact validation (Property 12)
+    - **Property 12: Contact form validation**
+    - **Validates: Requirements 8.2**
+  - [x] 11.6 Write property test for contact resilience (Property 19)
+    - **Property 19: Contact submission resilience to email failure**
+    - **Validates: Requirements 13.6**
+
+- [x] 12. Admin — Contact messages, homepage settings, email settings, SEO settings
+  - [x] 12.1 Create Admin\ContactMessageController (index, show) and React pages
+    - Read-only list view ordered by created_at descending
+    - _Requirements: 8.5_
+  - [x] 12.2 Create Admin\HomepageController (edit, update) and React page
+    - Manage hero section and stats values
+    - _Requirements: 10.4_
+  - [x] 12.3 Create Admin\EmailSettingsController (edit, update, test) and React page
+    - SMTP settings form with encrypted password storage
+    - "Send Test Email" button
+    - _Requirements: 13.1, 13.2, 13.3, 13.4_
+  - [x] 12.4 Create Admin\SeoController (edit, update) and React page
+    - Manage SEO metadata for static pages (homepage, contact, about)
+    - _Requirements: 12.2_
+  - [x] 12.5 Write property test for contact messages ordering (Property 13)
+    - **Property 13: Contact messages ordered by creation date**
+    - **Validates: Requirements 8.5**
+  - [x] 12.6 Write property test for email settings validation (Property 17)
+    - **Property 17: Email settings validation**
+    - **Validates: Requirements 13.2**
+  - [x] 12.7 Write property test for SMTP password encryption (Property 18)
+    - **Property 18: SMTP password encryption**
+    - **Validates: Requirements 13.3**
+
+- [x] 13. Database seeders and factories
+  - [x] 13.1 Create model factories for all models (DivisionFactory, CategoryFactory, BrandFactory, ProductFactory, ProductImageFactory, ProductSpecificationFactory, ContactMessageFactory)
+    - ProductFactory should generate both content_mode variants
+    - _Requirements: All_
+  - [x] 13.2 Create DatabaseSeeder with sample data for development
+    - Seed divisions, categories, brands, products (both modes), specs, images, homepage settings
+    - _Requirements: All_
+
+- [x] 14. Final checkpoint — Full integration verification
+  - Ensure all tests pass, ask the user if questions arise.
+
+## Notes
+
+- All tasks including property tests are required
+- Each task references specific requirements for traceability
+- Checkpoints ensure incremental validation
+- Property tests validate universal correctness properties using Pest (PHP) and fast-check (TypeScript)
+- The project uses Pest for PHP tests and Vitest + fast-check for frontend property tests
