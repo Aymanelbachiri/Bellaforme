@@ -6,10 +6,10 @@ interface OptimizedImageProps {
     sizes?: string;
 }
 
-function getWebPUrl(src: string, suffix: string): string {
+function getAvifUrl(src: string): string {
     const lastDot = src.lastIndexOf('.');
-    if (lastDot === -1) return `${src}-${suffix}.webp`;
-    return `${src.substring(0, lastDot)}-${suffix}.webp`;
+    if (lastDot === -1) return `${src}.avif`;
+    return `${src.substring(0, lastDot)}.avif`;
 }
 
 export default function OptimizedImage({
@@ -19,18 +19,13 @@ export default function OptimizedImage({
     className,
     sizes,
 }: OptimizedImageProps) {
-    const thumbUrl = getWebPUrl(src, 'thumb');
-    const mediumUrl = getWebPUrl(src, 'medium');
-    const largeUrl = getWebPUrl(src, 'large');
-    const xlargeUrl = getWebPUrl(src, 'xlarge');
-
-    const srcSet = `${thumbUrl} 150w, ${mediumUrl} 600w, ${largeUrl} 1200w, ${xlargeUrl} 1920w`;
+    const avifUrl = getAvifUrl(src);
 
     return (
         <picture>
             <source
-                type="image/webp"
-                srcSet={srcSet}
+                type="image/avif"
+                srcSet={avifUrl}
                 sizes={sizes}
             />
             <img

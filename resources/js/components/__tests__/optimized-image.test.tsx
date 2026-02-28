@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import OptimizedImage from '../optimized-image';
 
 describe('OptimizedImage', () => {
-    it('renders a picture element with WebP source and img fallback', () => {
+    it('renders a picture element with AVIF source and img fallback', () => {
         const { container } = render(
             <OptimizedImage src="/storage/uploads/photo.jpg" alt="Test photo" />
         );
@@ -12,11 +12,8 @@ describe('OptimizedImage', () => {
         expect(picture).toBeInTheDocument();
 
         const source = picture!.querySelector('source');
-        expect(source).toHaveAttribute('type', 'image/webp');
-        expect(source).toHaveAttribute(
-            'srcset',
-            '/storage/uploads/photo-thumb.webp 150w, /storage/uploads/photo-medium.webp 600w, /storage/uploads/photo-large.webp 1200w'
-        );
+        expect(source).toHaveAttribute('type', 'image/avif');
+        expect(source).toHaveAttribute('srcset', '/storage/uploads/photo.avif');
 
         const img = screen.getByRole('img', { name: 'Test photo' });
         expect(img).toHaveAttribute('src', '/storage/uploads/photo.jpg');
@@ -50,10 +47,7 @@ describe('OptimizedImage', () => {
             <OptimizedImage src="/storage/uploads/photo" alt="No ext" />
         );
         const source = container.querySelector('source');
-        expect(source).toHaveAttribute(
-            'srcset',
-            '/storage/uploads/photo-thumb.webp 150w, /storage/uploads/photo-medium.webp 600w, /storage/uploads/photo-large.webp 1200w'
-        );
+        expect(source).toHaveAttribute('srcset', '/storage/uploads/photo.avif');
     });
 
     it('handles src with multiple dots in path', () => {
@@ -61,9 +55,6 @@ describe('OptimizedImage', () => {
             <OptimizedImage src="/storage/uploads/my.photo.name.png" alt="Dots" />
         );
         const source = container.querySelector('source');
-        expect(source).toHaveAttribute(
-            'srcset',
-            '/storage/uploads/my.photo.name-thumb.webp 150w, /storage/uploads/my.photo.name-medium.webp 600w, /storage/uploads/my.photo.name-large.webp 1200w'
-        );
+        expect(source).toHaveAttribute('srcset', '/storage/uploads/my.photo.name.avif');
     });
 });

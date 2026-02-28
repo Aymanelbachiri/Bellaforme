@@ -16,39 +16,12 @@ function createModelWithOptimizedImages(): Model
     };
 }
 
-it('returns the correct optimized URL for thumb size', function () {
+it('returns the correct AVIF URL', function () {
     $model = createModelWithOptimizedImages();
 
-    $url = $model->getOptimizedImageUrl('uploads/hero-image.jpg', 'thumb');
+    $url = $model->getOptimizedImageUrl('uploads/hero-image.jpg');
 
-    expect($url)->toEndWith('/storage/uploads/hero-image-thumb.webp');
-});
-
-it('returns the correct optimized URL for medium size', function () {
-    $model = createModelWithOptimizedImages();
-
-    $url = $model->getOptimizedImageUrl('uploads/hero-image.jpg', 'medium');
-
-    expect($url)->toEndWith('/storage/uploads/hero-image-medium.webp');
-});
-
-it('returns the correct optimized URL for large size', function () {
-    $model = createModelWithOptimizedImages();
-
-    $url = $model->getOptimizedImageUrl('uploads/hero-image.jpg', 'large');
-
-    expect($url)->toEndWith('/storage/uploads/hero-image-large.webp');
-});
-
-it('returns all three optimized URLs from getOptimizedImageUrls', function () {
-    $model = createModelWithOptimizedImages();
-
-    $urls = $model->getOptimizedImageUrls('uploads/product-photo.png');
-
-    expect($urls)->toHaveKeys(['thumb', 'medium', 'large']);
-    expect($urls['thumb'])->toEndWith('/storage/uploads/product-photo-thumb.webp');
-    expect($urls['medium'])->toEndWith('/storage/uploads/product-photo-medium.webp');
-    expect($urls['large'])->toEndWith('/storage/uploads/product-photo-large.webp');
+    expect($url)->toEndWith('/storage/uploads/hero-image.avif');
 });
 
 it('returns the original image URL from getImageUrl', function () {
@@ -62,15 +35,15 @@ it('returns the original image URL from getImageUrl', function () {
 it('handles nested directory paths correctly', function () {
     $model = createModelWithOptimizedImages();
 
-    $url = $model->getOptimizedImageUrl('products/gallery/photo.jpg', 'medium');
+    $url = $model->getOptimizedImageUrl('products/gallery/photo.jpg');
 
-    expect($url)->toEndWith('/storage/products/gallery/photo-medium.webp');
+    expect($url)->toEndWith('/storage/products/gallery/photo.avif');
 });
 
 it('handles filenames with hyphens correctly', function () {
     $model = createModelWithOptimizedImages();
 
-    $url = $model->getOptimizedImageUrl('uploads/my-great-photo.png', 'thumb');
+    $url = $model->getOptimizedImageUrl('uploads/my-great-photo.png');
 
-    expect($url)->toEndWith('/storage/uploads/my-great-photo-thumb.webp');
+    expect($url)->toEndWith('/storage/uploads/my-great-photo.avif');
 });
