@@ -146,7 +146,7 @@ export default function NewsletterIndex({
                 onOpenChange={dialog.setOpen}
                 title={dialog.title}
                 description={dialog.description}
-                onConfirm={dialog.onConfirm}
+                onConfirm={dialog.handleConfirm}
             />
         </AppLayout>
     );
