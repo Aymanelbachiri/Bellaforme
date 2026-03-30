@@ -20,8 +20,15 @@ class BrandController extends Controller
 
     public function index(): Response
     {
+        $query = Brand::with('divisions')->orderBy('order');
+
+        if ($search = request('search')) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
         return Inertia::render('admin/brands/index', [
-            'brands' => Brand::with('divisions')->orderBy('order')->paginate(15),
+            'brands' => $query->paginate(15)->withQueryString(),
+            'filters' => ['search' => $search ?? ''],
         ]);
     }
 

@@ -1,7 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog, useConfirmDialog } from '@/components/confirm-dialog';
+import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Brand, PaginatedData } from '@/types';
 
@@ -12,10 +14,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function BrandsIndex({
     brands,
+    filters,
 }: {
     brands: PaginatedData<Brand>;
+    filters: { search: string };
 }) {
     const dialog = useConfirmDialog();
+    const [search, setSearch] = useState(filters.search ?? '');
 
     function handleDelete(brand: Brand) {
         dialog.confirm(
@@ -34,11 +39,21 @@ export default function BrandsIndex({
                     <h1 className="text-xl font-semibold tracking-tight">
                         Marques
                     </h1>
-                    <Button asChild>
-                        <Link href="/admin/brands/create">
-                            Créer une marque
-                        </Link>
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <form onSubmit={(e) => { e.preventDefault(); router.get('/admin/brands', search ? { search } : {}, { preserveState: true }); }}>
+                            <Input
+                                placeholder="Rechercher..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="h-9 w-48"
+                            />
+                        </form>
+                        <Button asChild>
+                            <Link href="/admin/brands/create">
+                                Créer une marque
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="overflow-hidden rounded-lg border">

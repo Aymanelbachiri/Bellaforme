@@ -23,10 +23,15 @@ class ProductController extends Controller
 
     public function index(): Response
     {
+        $query = Product::with(['division', 'category', 'brand'])->orderBy('order');
+
+        if ($search = request('search')) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
         return Inertia::render('admin/products/index', [
-            'products' => Product::with(['division', 'category', 'brand'])
-                ->orderBy('order')
-                ->paginate(15),
+            'products' => $query->paginate(15)->withQueryString(),
+            'filters' => ['search' => $search ?? ''],
         ]);
     }
 
