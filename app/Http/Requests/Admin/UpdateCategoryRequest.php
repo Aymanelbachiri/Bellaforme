@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Rules\ImageOrPath;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -21,13 +22,15 @@ class UpdateCategoryRequest extends FormRequest
             'division_id' => ['required', 'exists:divisions,id'],
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('categories', 'slug')->ignore($this->route('category'))],
-            'image' => ['nullable', 'image', 'max:10240'],
+            'image' => ['nullable', new ImageOrPath],
+            'hero_image' => ['nullable', new ImageOrPath],
+            'video_cover' => ['nullable', new ImageOrPath],
+            'video_url' => ['nullable', 'string', 'url', 'max:500'],
             'order' => ['integer'],
             'is_active' => ['boolean'],
-            // SEO fields
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string'],
-            'og_image' => ['nullable', 'image', 'max:10240'],
+            'og_image' => ['nullable', new ImageOrPath],
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Rules\ImageOrPath;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreBrandRequest extends FormRequest
@@ -21,7 +22,7 @@ class StoreBrandRequest extends FormRequest
             'division_ids.*' => ['exists:divisions,id'],
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:brands,slug'],
-            'logo' => ['required', 'image', 'max:10240'],
+            'logo' => ['required', new ImageOrPath],
             'is_partner' => ['boolean'],
             'is_reference' => ['boolean'],
             'order' => ['integer'],

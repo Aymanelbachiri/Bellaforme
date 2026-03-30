@@ -1,4 +1,39 @@
-/* Manrope */
+/* ── Manrope ── */
+@font-face {
+    font-family: 'Manrope';
+    src: url('/fonts/manrope-thin.woff') format('woff');
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Manrope';
+    src: url('/fonts/manrope-light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Manrope';
+    src: url('/fonts/manrope-regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Manrope';
+    src: url('/fonts/manrope-medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Manrope';
+    src: url('/fonts/manrope-semibold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
 @font-face {
     font-family: 'Manrope';
     src: url('/fonts/manrope-bold.woff') format('woff');
@@ -7,7 +42,14 @@
     font-display: swap;
 }
 
-/* Myriad Pro */
+/* ── Myriad Pro ── */
+@font-face {
+    font-family: 'Myriad Pro';
+    src: url('/fonts/MyriadPro-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
 @font-face {
     font-family: 'Myriad Pro';
     src: url('/fonts/MYRIADPRO-REGULAR.woff') format('woff');
@@ -15,7 +57,20 @@
     font-style: normal;
     font-display: swap;
 }
-
+@font-face {
+    font-family: 'Myriad Pro';
+    src: url('/fonts/MYRIADPRO-SEMIBOLD.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Myriad Pro';
+    src: url('/fonts/MYRIADPRO-SEMIBOLDIT.woff') format('woff');
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+}
 @font-face {
     font-family: 'Myriad Pro';
     src: url('/fonts/MYRIADPRO-BOLD.woff') format('woff');
@@ -23,8 +78,45 @@
     font-style: normal;
     font-display: swap;
 }
+@font-face {
+    font-family: 'Myriad Pro';
+    src: url('/fonts/MYRIADPRO-BOLDIT.woff') format('woff');
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
 
-/* DistilleryScript */
+/* ── Myriad Pro Condensed ── */
+@font-face {
+    font-family: 'Myriad Pro Condensed';
+    src: url('/fonts/MYRIADPRO-COND.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Myriad Pro Condensed';
+    src: url('/fonts/MYRIADPRO-CONDIT.woff') format('woff');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Myriad Pro Condensed';
+    src: url('/fonts/MYRIADPRO-BOLDCOND.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Myriad Pro Condensed';
+    src: url('/fonts/MYRIADPRO-BOLDCONDIT.woff') format('woff');
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* ── DistilleryScript ── */
 @font-face {
     font-family: 'DistilleryScript';
     src: url('/fonts/DistilleryScript.woff2') format('woff2');
@@ -56,6 +148,12 @@
 
     --font-myriad:
         'Myriad Pro', 'Myriad', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+    --font-myriad-cond:
+        'Myriad Pro Condensed', 'Myriad Pro', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+    --font-distillery:
+        'DistilleryScript', cursive;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -272,9 +370,34 @@
     display: none;
 }
 
-/* Glow button */
+/* Glow effect */
 .glow-btn {
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+.glow-btn:hover {
+    box-shadow: 0 0 15px rgba(213, 171, 112, 0.8);
+}
+
+.glow-btn-gold:hover {
+    box-shadow: 0 0 15px rgba(213, 171, 112, 0.8);
+}
+.glow-text{
+    text-shadow:0 0 5px rgba(255,255,255,0.9), 0 0 15px rgba(255,255,255,0.7);
+}
+
+/* Hero slider dots – reduced bottom offset on mobile */
+@media (max-width: 639px) {
+    .hero-slider .slick-dots {
+        bottom: 20px;
+    }
+}
+
+/* Play button position – mobile */
+@media (max-width: 767px) {
+    .hero-play-btn {
+        bottom: -0.5rem !important;
+    }
 }
 
 /* Play button position at ~1450px */
@@ -282,6 +405,22 @@
     .hero-play-btn {
         bottom: -0.8rem !important;
     }
+}
+
+/* Page entrance animation (division, category, home) */
+@keyframes entrance-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.entrance-fade-up {
+    animation: entrance-fade-up 0.5s ease-out forwards;
 }
 
 /* Brand marquee infinite scroll */
@@ -300,10 +439,31 @@
 }
 
 .brand-marquee {
-    animation: brand-scroll 25s linear infinite;
+    animation: brand-scroll 60s linear infinite;
     width: max-content;
 }
 
 .brand-marquee:hover {
     animation-play-state: paused;
+}
+
+/* Product image slider arrows */
+.product-slider .slick-prev,
+.product-slider .slick-next {
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+}
+
+.product-slider .slick-prev {
+    left: 0;
+}
+
+.product-slider .slick-next {
+    right: 0;
+}
+
+.product-slider .slick-prev:before,
+.product-slider .slick-next:before {
+    display: none;
 }

@@ -35,7 +35,7 @@ class ProductController extends Controller
         return Inertia::render('admin/products/create', [
             'divisions' => Division::orderBy('name')->get(['id', 'name']),
             'categories' => Category::orderBy('name')->get(['id', 'name', 'division_id']),
-            'brands' => Brand::orderBy('name')->get(['id', 'name']),
+            'brands' => Brand::where('is_partner', true)->with('divisions:id')->orderBy('name')->get(['id', 'name']),
             'nextOrder' => (Product::max('order') ?? -1) + 1,
         ]);
     }
@@ -44,21 +44,23 @@ class ProductController extends Controller
     {
         $data = $request->validated();
 
-        // Handle featured_image upload
-        $data['featured_image'] = $this->imageOptimizer->optimize($request->file('featured_image'), 'products');
+        $data['featured_image'] = $this->imageOptimizer->resolveImage($request, 'featured_image', 'products');
 
-        // Handle brochure_file upload (PDF, no optimization)
+        // Handle brochure_file: upload (keep name, add suffix if exists) or use existing path from media picker
         if ($request->hasFile('brochure_file')) {
-            $data['brochure_file'] = $request->file('brochure_file')->store('products/brochures', 'public');
+            $data['brochure_file'] = $this->storeBrochureWithOriginalName($request->file('brochure_file'));
+        } elseif (is_string($request->input('brochure_file')) && Storage::disk('public')->exists($request->input('brochure_file'))) {
+            $data['brochure_file'] = $request->input('brochure_file');
         }
 
         // Extract SEO fields and specifications/gallery before creating product
         $seoData = $this->extractSeoData($data, $request);
         $specifications = $data['specifications'] ?? null;
         $gallery = $request->file('gallery');
+        $galleryOrder = $request->input('gallery_order');
 
         // Remove non-product fields
-        unset($data['meta_title'], $data['meta_description'], $data['og_image'], $data['specifications'], $data['gallery']);
+        unset($data['meta_title'], $data['meta_description'], $data['og_image'], $data['specifications'], $data['gallery'], $data['gallery_order']);
 
         $product = Product::create($data);
 
@@ -70,7 +72,7 @@ class ProductController extends Controller
         // Sync specifications and gallery for detailed products
         if ($product->content_mode === 'detailed') {
             $this->syncSpecifications($product, $specifications);
-            $this->syncGalleryImages($product, $gallery);
+            $this->syncGalleryImages($product, $gallery, $galleryOrder);
         }
 
         return to_route('admin.products.index');
@@ -84,7 +86,7 @@ class ProductController extends Controller
             'product' => $product,
             'divisions' => Division::orderBy('name')->get(['id', 'name']),
             'categories' => Category::orderBy('name')->get(['id', 'name', 'division_id']),
-            'brands' => Brand::orderBy('name')->get(['id', 'name']),
+            'brands' => Brand::where('is_partner', true)->with('divisions:id')->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -92,20 +94,22 @@ class ProductController extends Controller
     {
         $data = $request->validated();
 
-        // Handle featured_image replacement
-        if ($request->hasFile('featured_image')) {
+        $resolvedFeatured = $this->imageOptimizer->resolveImage($request, 'featured_image', 'products');
+        if ($resolvedFeatured && $resolvedFeatured !== $product->featured_image) {
             $this->imageOptimizer->delete($product->featured_image);
-            $data['featured_image'] = $this->imageOptimizer->optimize($request->file('featured_image'), 'products');
+            $data['featured_image'] = $resolvedFeatured;
         } else {
             unset($data['featured_image']);
         }
 
-        // Handle brochure_file replacement
+        // Handle brochure_file: upload (keep name, add suffix if exists), existing path, or keep current
         if ($request->hasFile('brochure_file')) {
             if ($product->brochure_file) {
                 Storage::disk('public')->delete($product->brochure_file);
             }
-            $data['brochure_file'] = $request->file('brochure_file')->store('products/brochures', 'public');
+            $data['brochure_file'] = $this->storeBrochureWithOriginalName($request->file('brochure_file'));
+        } elseif (is_string($request->input('brochure_file')) && Storage::disk('public')->exists($request->input('brochure_file'))) {
+            $data['brochure_file'] = $request->input('brochure_file');
         } else {
             unset($data['brochure_file']);
         }
@@ -114,9 +118,10 @@ class ProductController extends Controller
         $seoData = $this->extractSeoData($data, $request);
         $specifications = $data['specifications'] ?? null;
         $gallery = $request->file('gallery');
+        $galleryOrder = $request->input('gallery_order');
 
         // Remove non-product fields
-        unset($data['meta_title'], $data['meta_description'], $data['og_image'], $data['specifications'], $data['gallery']);
+        unset($data['meta_title'], $data['meta_description'], $data['og_image'], $data['specifications'], $data['gallery'], $data['gallery_order']);
 
         $product->update($data);
 
@@ -129,7 +134,7 @@ class ProductController extends Controller
         // Handle content_mode-specific sync
         if ($product->content_mode === 'detailed') {
             $this->syncSpecifications($product, $specifications);
-            $this->syncGalleryImages($product, $gallery);
+            $this->syncGalleryImages($product, $gallery, $galleryOrder);
         } else {
             // brochure_only: remove existing specifications and gallery images
             $product->specifications()->delete();
@@ -186,20 +191,42 @@ class ProductController extends Controller
     }
 
     /**
-     * Sync gallery images — optimize and create new ProductImage records.
+     * Sync gallery images — create ProductImage records from uploaded files and/or existing paths.
+     * $galleryOrderJson: optional JSON array of { type: 'file', index: int } | { type: 'path', path: string } in display order.
      */
-    private function syncGalleryImages(Product $product, ?array $galleryFiles): void
+    private function syncGalleryImages(Product $product, ?array $galleryFiles, ?string $galleryOrderJson = null): void
     {
-        if (empty($galleryFiles)) {
+        $galleryFiles = $galleryFiles ?? [];
+        $orderEntries = $galleryOrderJson ? json_decode($galleryOrderJson, true) : null;
+
+        if ($orderEntries && is_array($orderEntries)) {
+            $maxOrder = $product->images()->max('order') ?? -1;
+            foreach ($orderEntries as $i => $entry) {
+                if (! is_array($entry) || empty($entry['type'])) {
+                    continue;
+                }
+                if ($entry['type'] === 'path' && ! empty($entry['path'])) {
+                    $imagePath = $entry['path'];
+                } elseif ($entry['type'] === 'file' && isset($entry['index']) && isset($galleryFiles[$entry['index']])) {
+                    $imagePath = $this->imageOptimizer->optimize($galleryFiles[$entry['index']], 'products/gallery');
+                } else {
+                    continue;
+                }
+                $product->images()->create([
+                    'image_path' => $imagePath,
+                    'order' => $maxOrder + $i + 1,
+                ]);
+            }
             return;
         }
 
-        // Get the current max order for existing images
+        // Legacy: no gallery_order — treat gallery as list of files only
+        if (empty($galleryFiles)) {
+            return;
+        }
         $maxOrder = $product->images()->max('order') ?? -1;
-
         foreach ($galleryFiles as $index => $file) {
             $imagePath = $this->imageOptimizer->optimize($file, 'products/gallery');
-
             $product->images()->create([
                 'image_path' => $imagePath,
                 'order' => $maxOrder + $index + 1,
@@ -220,6 +247,28 @@ class ProductController extends Controller
     }
 
     /**
+     * Store brochure PDF keeping original filename; add -1, -2 suffix if file already exists.
+     */
+    private function storeBrochureWithOriginalName(\Illuminate\Http\UploadedFile $file): string
+    {
+        $disk = Storage::disk('public');
+        $directory = 'products/brochures';
+        $originalName = $file->getClientOriginalName();
+        $name = pathinfo($originalName, PATHINFO_FILENAME);
+        $ext = strtolower($file->getClientOriginalExtension() ?: 'pdf');
+        $name = preg_replace('/[^a-zA-Z0-9._-]/', '_', $name);
+
+        $finalName = $name.'.'.$ext;
+        $counter = 1;
+        while ($disk->exists($directory.'/'.$finalName)) {
+            $finalName = $name.'-'.$counter.'.'.$ext;
+            $counter++;
+        }
+
+        return $file->storeAs($directory, $finalName, 'public');
+    }
+
+    /**
      * Extract SEO data from validated data, handling og_image upload.
      */
     private function extractSeoData(array &$data, StoreProductRequest|UpdateProductRequest $request): array
@@ -230,8 +279,9 @@ class ProductController extends Controller
             'og_image' => null,
         ];
 
-        if ($request->hasFile('og_image')) {
-            $seoData['og_image'] = $this->imageOptimizer->optimize($request->file('og_image'), 'seo');
+        $resolvedOg = $this->imageOptimizer->resolveImage($request, 'og_image', 'seo');
+        if ($resolvedOg) {
+            $seoData['og_image'] = $resolvedOg;
         }
 
         return $seoData;

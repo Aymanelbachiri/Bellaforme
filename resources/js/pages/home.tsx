@@ -1,9 +1,9 @@
-import { Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import OptimizedImage from '@/components/optimized-image';
+import OptimizedImage, { getAvifUrl } from '@/components/optimized-image';
 import SeoHead from '@/components/seo-head';
 import PublicLayout from '@/layouts/public-layout';
 import type { Division, HeroSlide, HomepageSettings, SeoData } from '@/types/models';
@@ -15,9 +15,20 @@ interface HomeProps {
 }
 
 export default function Home({ settings, divisions, seo }: HomeProps) {
+    const firstSlide = settings?.hero_slides?.[0];
+    const firstSlideAvif =
+        firstSlide?.type === 'image' && firstSlide?.media_url
+            ? getAvifUrl(`/storage/${firstSlide.media_url}`)
+            : null;
+
     return (
         <PublicLayout>
             <SeoHead {...seo} />
+            {firstSlideAvif && (
+                <Head>
+                    <link rel="preload" href={firstSlideAvif} as="image" type="image/avif" />
+                </Head>
+            )}
             <HeroSection settings={settings} />
             <DivisionShowcase divisions={divisions} />
             <StatsSection stats={settings?.stats ?? []} />
@@ -41,7 +52,7 @@ function getEmbedUrl(url: string): string | null {
     return null;
 }
 
-function SlideBackground({ slide }: { slide: HeroSlide }) {
+function SlideBackground({ slide, isFirst }: { slide: HeroSlide; isFirst?: boolean }) {
     if (slide.type === 'video') {
         const embedUrl = getEmbedUrl(slide.media_url);
         if (embedUrl) {
@@ -50,12 +61,13 @@ function SlideBackground({ slide }: { slide: HeroSlide }) {
                     <iframe
                         src={embedUrl}
                         title="Hero video"
-                        className="absolute left-1/2 top-1/2 h-[120%] w-[120%] -translate-x-1/2 -translate-y-1/2"
-                        style={{ border: 'none', pointerEvents: 'none' }}
+                        className="absolute left-1/2 top-1/2 min-h-full min-w-full -translate-x-1/2 -translate-y-1/2"
+                        style={{ border: 'none', pointerEvents: 'none', aspectRatio: '16/9', width: 'max(100%, 177.78vh)', height: 'max(100%, 56.25vw)' }}
                         allow="autoplay; muted; encrypted-media"
                         allowFullScreen={false}
                     />
                     <div className="absolute inset-0 bg-black/40" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black via-black/30 to-transparent" />
                 </div>
             );
         }
@@ -63,8 +75,9 @@ function SlideBackground({ slide }: { slide: HeroSlide }) {
             const videoSrc = slide.media_url.startsWith('http') ? slide.media_url : `/storage/${slide.media_url}`;
             return (
                 <div className="absolute inset-0 overflow-hidden">
-                    <video src={videoSrc} autoPlay muted loop playsInline className="h-full w-full object-cover" />
+                    <video src={videoSrc} autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" />
                     <div className="absolute inset-0 bg-black/40" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black via-black/30 to-transparent" />
                 </div>
             );
         }
@@ -72,7 +85,8 @@ function SlideBackground({ slide }: { slide: HeroSlide }) {
     if (slide.media_url) {
         return (
             <div className="absolute inset-0">
-                <OptimizedImage src={`/storage/${slide.media_url}`} alt={slide.title || 'Hero background'} loading="eager" className="h-full w-full object-cover opacity-60" sizes="100vw" />
+                <OptimizedImage src={`/storage/${slide.media_url}`} alt={slide.title || 'Hero background'} loading="eager" fetchPriority={isFirst ? 'high' : undefined} className="h-full w-full object-cover opacity-70" sizes="100vw" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black via-black/30 to-transparent" />
             </div>
         );
     }
@@ -89,27 +103,27 @@ function HeroSection({ settings }: { settings: HomepageSettings | null }) {
     };
 
     return (
-        <section className="hero-slider relative bg-black overflow-hidden">
-            <Slider {...sliderSettings} className=" rounded-b-[48px]">
+        <section className="hero-slider relative bg-black overflow-hidden md:rounded-b-[42px] rounded-b-[18px]">
+            <Slider {...sliderSettings}>
                 {slides.map((slide, index) => (
                     <div key={index}>
-                        <div className="relative flex min-h-[70vh] items-center justify-center bg-black">
-                            <SlideBackground slide={slide} />
-                            <div className="relative z-10 mx-auto max-w-4xl px-4 text-center text-white">
+                        <div className="relative flex min-h-[50vh] sm:min-h-[70vh] items-center justify-center bg-black">
+                            <SlideBackground slide={slide} isFirst={index === 0} />
+                            <div className="relative z-10 mx-auto max-w-4xl px-4 text-center text-white entrance-fade-up">
                                 {slide.title && (
-                                    <h2 className="mb-4 text-4xl font-bold leading-tight md:text-5xl lg:text-6xl [text-shadow:0_0_5px_rgba(255,255,255,0.9),0_0_15px_rgba(255,255,255,0.7)]" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                                    <h2 className="mb-4 text-2xl font-bold leading-tight sm:text-4xl md:text-5xl lg:text-6xl glow-text" style={{ fontFamily: "'Manrope', sans-serif" }}>
                                         {slide.title}
                                     </h2>
                                 )}
                                 {slide.subtitle && (
-                                    <p className="mx-auto max-w-2xl text-lg text-white md:text" style={{ fontFamily: "'Myriad Pro', 'Segoe UI', Helvetica, Arial, sans-serif" }}>
+                                    <p className="mx-auto max-w-2xl text-base text-white sm:text-lg" style={{ fontFamily: "'Myriad Pro', 'Segoe UI', Helvetica, Arial, sans-serif" }}>
                                         {slide.subtitle}
                                     </p>
                                 )}
                                 {slide.button_text && (
                                     <a
                                         href={slide.button_url || '/contact'}
-                                        className="glow-btn mt-8 inline-block rounded-full bg-white px-8 py-3 text-sm text-black transition-colors hover:bg-white/80"
+                                        className="glow-btn mt-8 inline-block rounded-full bg-white px-8 py-3 text-sm text-black transition-colors hover:bg-[#d5ab70] hover:text-white"
                                         style={{ fontFamily: "'Myriad Pro', 'Segoe UI', Helvetica, Arial, sans-serif", fontWeight: 700 }}
                                     >
                                         {slide.button_text}
@@ -121,7 +135,7 @@ function HeroSection({ settings }: { settings: HomepageSettings | null }) {
                 ))}
             </Slider>
             {/* Decorative shape + play button at bottom of hero slider */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden">
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden hidden sm:block">
                 <div className="relative">
                     <img
                         src="/images/shape-2.png"
@@ -133,8 +147,9 @@ function HeroSection({ settings }: { settings: HomepageSettings | null }) {
                     
                     <button
                         type="button"
-                        className="hero-play-btn absolute left-1/2 translate-y-1/2 md:bottom-[-0.3rem] md:-translate-y-1/2 -translate-x-1/2 glow-btn flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-black shadow-lg transition-transform hover:scale-110 "
+                        className="hero-play-btn absolute left-1/2 bottom-5 translate-y-1/2 md:bottom-[-0.3rem] md:-translate-y-1/2 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-black shadow-lg transition-transform hover:scale-110 "
                         aria-label="Play video"
+                        style={{ boxShadow: "0 0 10px rgba(255, 255, 255, 0.8)" }}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 ml-0.5">
                             <path d="M8 5.14v14l11-7-11-7z" />
@@ -155,7 +170,7 @@ function LegacyHero({ settings }: { settings: HomepageSettings | null }) {
                     <OptimizedImage src={bgImage} alt="Hero background" loading="eager" className="h-full w-full object-cover opacity-60" sizes="100vw" />
                 </div>
             )}
-            <div className="relative z-10 mx-auto max-w-4xl px-4 text-center text-white">
+            <div className="relative z-10 mx-auto max-w-4xl px-4 text-center text-white entrance-fade-up">
                 {settings?.hero_title && (
                     <h1 className="mb-6 text-4xl font-bold leading-tight md:text-5xl lg:text-6xl" style={{ fontFamily: "'Manrope', sans-serif" }}>
                         {settings.hero_title}
@@ -187,9 +202,35 @@ function DivisionShowcase({ divisions }: { divisions: Division[] }) {
 }
 
 function DivisionCard({ division, isRight }: { division: Division; isRight: boolean }) {
+    const cardRef = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        const el = cardRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true);
+                    observer.unobserve(el);
+                }
+            },
+            { threshold: 0.15 },
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
     const bgImage = division.homepage_image || division.hero_image;
     return (
-        <div className="relative flex min-h-[65vh] items-end overflow-hidden my-2">
+        <div
+            ref={cardRef}
+            className="relative flex min-h-[45vh] sm:min-h-[65vh] items-end overflow-hidden my-2 transition-all duration-[1200ms] ease-out"
+            style={{
+                opacity: isVisible ? 1 : 0,
+                transform: isVisible ? 'translateY(0)' : 'translateY(60px)',
+            }}
+        >
             {bgImage ? (
                 <div className="absolute inset-0">
                     <OptimizedImage
@@ -204,7 +245,7 @@ function DivisionCard({ division, isRight }: { division: Division; isRight: bool
                 <div className="absolute inset-0 bg-black" />
             )}
             <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-16 sm:px-8 lg:px-12">
-                <div className={`max-w-lg ${isRight ? 'ml-auto' : ''}`}>
+                <div className={`max-w-lg ${isRight ? 'ml-auto text-right' : ''}`}>
                     <h3
                         className="mb-3 text-2xl font-bold uppercase tracking-wide text-white md:text-3xl"
                         style={{ fontFamily: "'Manrope', sans-serif" }}
@@ -213,16 +254,16 @@ function DivisionCard({ division, isRight }: { division: Division; isRight: bool
                     </h3>
                     {(division.homepage_subtitle || division.hero_subtitle) && (
                         <p
-                            className="mb-18 text-sm leading-relaxed text-white md:text-base"
+                            className="mb-8 text-sm leading-relaxed text-white md:mb-18 md:text-base"
                             style={{ fontFamily: "'Myriad Pro', 'Segoe UI', Helvetica, Arial, sans-serif" }}
                         >
                             {division.homepage_subtitle || division.hero_subtitle}
                         </p>
                     )}
-                    <div className="flex flex-wrap gap-3">
+                    <div className={`flex flex-wrap gap-3 ${isRight ? 'justify-end' : ''}`}>
                         <Link
                             href={`/${division.slug}`}
-                            className="glow-btn rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-white/80"
+                            className="glow-btn rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-[#d5ab70] hover:text-white"
                             style={{ fontFamily: "'Myriad Pro', 'Segoe UI', Helvetica, Arial, sans-serif" }}
                         >
                             Découvrir
@@ -266,7 +307,7 @@ function StatsSection({ stats }: { stats: Array<{ label: string; value: string }
 
     if (stats.length === 0) return null;
     return (
-        <section ref={sectionRef} className="bg-black py-24">
+        <section ref={sectionRef} className="bg-black py-14 sm:py-24">
             <div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
                 <h2
                     className="mb-1 text-sm font-bold uppercase tracking-[0.25em] text-white"
@@ -284,12 +325,10 @@ function StatsSection({ stats }: { stats: Array<{ label: string; value: string }
                     {stats.map((stat, index) => (
                         <div
                             key={index}
-                            className="border-y-0 px-8 py-12 [border-image:linear-gradient(to_bottom,transparent_25%,_#fff_75%,_transparent_100%)_1]"
-                            style={{
-                                borderLeftWidth: index === 0 ? '0' : '1px',
-                                borderRightWidth: index === stats.length - 2 ? '1px' : '0',
-                                borderStyle: 'solid',
-                            }}
+                            className={`border-y-0 px-8 py-12 sm:[border-image:linear-gradient(to_bottom,transparent_25%,_#fff_75%,_transparent_100%)_1] ${
+                                index === 0 ? '' : 'sm:border-l'
+                            } ${index === stats.length - 2 ? 'sm:border-r' : ''}`}
+                            style={{ borderStyle: 'solid' }}
                         >
                             <p className="text-4xl font-bold text-white md:text-5xl" style={{ fontFamily: "'Manrope', sans-serif" }}>
                                 <CountUp value={stat.value} animate={hasAnimated} />

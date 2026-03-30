@@ -22,6 +22,11 @@ class Division extends Model
         'hero_title',
         'hero_subtitle',
         'homepage_subtitle',
+        'phone',
+        'facebook_url',
+        'instagram_url',
+        'linkedin_url',
+        'youtube_url',
         'order',
         'is_active',
     ];

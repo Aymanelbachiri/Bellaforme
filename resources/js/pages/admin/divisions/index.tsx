@@ -6,7 +6,7 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Division, PaginatedData } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Tableau de bord', href: '/dashboard' },
     { title: 'Divisions', href: '/admin/divisions' },
 ];
 
@@ -19,8 +19,8 @@ export default function DivisionsIndex({
 
     function handleDelete(division: Division) {
         dialog.confirm(
-            `Delete "${division.name}"?`,
-            'This division and all its data will be permanently deleted. This action cannot be undone.',
+            `Supprimer "${division.name}" ?`,
+            'Cette division et toutes ses données seront définitivement supprimées. Cette action est irréversible.',
             () => router.delete(`/admin/divisions/${division.id}`),
         );
     }
@@ -36,7 +36,7 @@ export default function DivisionsIndex({
                     </h1>
                     <Button asChild>
                         <Link href="/admin/divisions/create">
-                            Create Division
+                            Créer une division
                         </Link>
                     </Button>
                 </div>
@@ -49,16 +49,16 @@ export default function DivisionsIndex({
                                     Image
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
-                                    Name
+                                    Nom
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
                                     Slug
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
-                                    Order
+                                    Ordre
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
-                                    Status
+                                    Statut
                                 </th>
                                 <th className="px-4 py-3 text-right font-medium">
                                     Actions
@@ -77,7 +77,7 @@ export default function DivisionsIndex({
                                             />
                                         ) : (
                                             <div className="flex h-10 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
-                                                No image
+                                    Pas d'image
                                             </div>
                                         )}
                                     </td>
@@ -99,8 +99,8 @@ export default function DivisionsIndex({
                                             }
                                         >
                                             {division.is_active
-                                                ? 'Active'
-                                                : 'Inactive'}
+                                                ? 'Actif'
+                                                : 'Inactif'}
                                         </Badge>
                                     </td>
                                     <td className="px-4 py-3 text-right">
@@ -113,7 +113,7 @@ export default function DivisionsIndex({
                                                 <Link
                                                     href={`/admin/divisions/${division.id}/edit`}
                                                 >
-                                                    Edit
+                                                    Modifier
                                                 </Link>
                                             </Button>
                                             <Button
@@ -123,7 +123,7 @@ export default function DivisionsIndex({
                                                     handleDelete(division)
                                                 }
                                             >
-                                                Delete
+                                                Supprimer
                                             </Button>
                                         </div>
                                     </td>
@@ -135,7 +135,7 @@ export default function DivisionsIndex({
                                         colSpan={6}
                                         className="px-4 py-8 text-center text-muted-foreground"
                                     >
-                                        No divisions found.
+                                    Aucune division trouvée.
                                     </td>
                                 </tr>
                             )}

@@ -6,8 +6,8 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Category, PaginatedData } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Categories', href: '/admin/categories' },
+    { title: 'Tableau de bord', href: '/dashboard' },
+    { title: 'Catégories', href: '/admin/categories' },
 ];
 
 export default function CategoriesIndex({
@@ -19,24 +19,24 @@ export default function CategoriesIndex({
 
     function handleDelete(category: Category) {
         dialog.confirm(
-            `Delete "${category.name}"?`,
-            'This category will be permanently deleted. This action cannot be undone.',
+            `Supprimer "${category.name}" ?`,
+            'Cette catégorie sera définitivement supprimée. Cette action est irréversible.',
             () => router.delete(`/admin/categories/${category.id}`),
         );
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Categories" />
+            <Head title="Catégories" />
 
             <div className="space-y-6 p-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-xl font-semibold tracking-tight">
-                        Categories
+                        Catégories
                     </h1>
                     <Button asChild>
                         <Link href="/admin/categories/create">
-                            Create Category
+                            Créer une catégorie
                         </Link>
                     </Button>
                 </div>
@@ -49,7 +49,7 @@ export default function CategoriesIndex({
                                     Image
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
-                                    Name
+                                    Nom
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
                                     Slug
@@ -58,10 +58,10 @@ export default function CategoriesIndex({
                                     Division
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
-                                    Order
+                                    Ordre
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
-                                    Status
+                                    Statut
                                 </th>
                                 <th className="px-4 py-3 text-right font-medium">
                                     Actions
@@ -80,7 +80,7 @@ export default function CategoriesIndex({
                                             />
                                         ) : (
                                             <div className="flex h-10 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
-                                                No image
+                                                Pas d'image
                                             </div>
                                         )}
                                     </td>
@@ -105,8 +105,8 @@ export default function CategoriesIndex({
                                             }
                                         >
                                             {category.is_active
-                                                ? 'Active'
-                                                : 'Inactive'}
+                                                ? 'Actif'
+                                                : 'Inactif'}
                                         </Badge>
                                     </td>
                                     <td className="px-4 py-3 text-right">
@@ -119,7 +119,7 @@ export default function CategoriesIndex({
                                                 <Link
                                                     href={`/admin/categories/${category.id}/edit`}
                                                 >
-                                                    Edit
+                                                    Modifier
                                                 </Link>
                                             </Button>
                                             <Button
@@ -129,7 +129,7 @@ export default function CategoriesIndex({
                                                     handleDelete(category)
                                                 }
                                             >
-                                                Delete
+                                                Supprimer
                                             </Button>
                                         </div>
                                     </td>
@@ -141,7 +141,7 @@ export default function CategoriesIndex({
                                         colSpan={7}
                                         className="px-4 py-8 text-center text-muted-foreground"
                                     >
-                                        No categories found.
+                                        Aucune catégorie trouvée.
                                     </td>
                                 </tr>
                             )}

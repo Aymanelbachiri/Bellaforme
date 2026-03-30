@@ -23,9 +23,9 @@ export function ConfirmDialog({
     open,
     onOpenChange,
     onConfirm,
-    title = 'Are you sure?',
-    description = 'This action cannot be undone.',
-    confirmLabel = 'Delete',
+    title = 'Êtes-vous sûr ?',
+    description = 'Cette action est irréversible.',
+    confirmLabel = 'Supprimer',
     processing = false,
 }: ConfirmDialogProps) {
     return (
@@ -37,10 +37,10 @@ export function ConfirmDialog({
                 </DialogHeader>
                 <DialogFooter>
                     <Button variant="outline" onClick={() => onOpenChange(false)}>
-                        Cancel
+                        Annuler
                     </Button>
                     <Button variant="destructive" onClick={onConfirm} disabled={processing}>
-                        {processing ? 'Deleting…' : confirmLabel}
+                        {processing ? 'Suppression…' : confirmLabel}
                     </Button>
                 </DialogFooter>
             </DialogContent>

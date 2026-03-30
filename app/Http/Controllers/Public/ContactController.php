@@ -7,6 +7,7 @@ use App\Http\Requests\StoreContactMessageRequest;
 use App\Mail\ContactFormNotification;
 use App\Models\ContactMessage;
 use App\Models\EmailSetting;
+use App\Models\SeoMetadata;
 use App\Services\DynamicSmtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -18,12 +19,14 @@ class ContactController extends Controller
 {
     public function index(Request $request): Response
     {
+        $seo = SeoMetadata::where('seoable_type', 'page')->where('seoable_id', 2)->first();
+
         return Inertia::render('contact', [
             'product_id' => $request->query('product_id'),
             'seo' => [
-                'meta_title' => 'Contactez-nous - Bella Forme Group',
-                'meta_description' => 'Contactez Bella Forme Group pour toute demande de devis ou d\'information sur nos équipements professionnels.',
-                'og_image' => null,
+                'meta_title' => $seo?->meta_title ?? 'Contactez-nous - Bella Forme Group',
+                'meta_description' => $seo?->meta_description ?? 'Contactez Bella Forme Group pour toute demande de devis ou d\'information sur nos équipements professionnels.',
+                'og_image' => $seo?->og_image ? asset('storage/' . $seo->og_image) : null,
                 'canonical_url' => url('/contact'),
             ],
         ]);

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Rules\ImageOrPath;
+use App\Rules\PdfFileOrPath;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreProductRequest extends FormRequest
@@ -35,10 +37,10 @@ class StoreProductRequest extends FormRequest
             'brand_id' => ['nullable', 'exists:brands,id'],
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:products,slug'],
-            'short_description' => ['required', 'string'],
-            'featured_image' => ['required', 'image', 'max:10240'],
-            'description' => ['required_if:content_mode,detailed', 'nullable', 'string'],
-            'brochure_file' => ['required_if:content_mode,brochure_only', 'nullable', 'file', 'mimes:pdf', 'max:61440'],
+            'short_description' => ['nullable', 'string'],
+            'featured_image' => ['required', new ImageOrPath],
+            'description' => ['nullable', 'string'],
+            'brochure_file' => ['required_if:content_mode,brochure_only', 'nullable', new PdfFileOrPath],
             'video_url' => ['nullable', 'url'],
             'is_active' => ['boolean'],
             'order' => ['integer'],
@@ -47,10 +49,11 @@ class StoreProductRequest extends FormRequest
             'specifications.*.value' => ['required_with:specifications', 'string'],
             'gallery' => ['nullable', 'array'],
             'gallery.*' => ['image'],
+            'gallery_order' => ['nullable', 'string'],
             // SEO fields
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string'],
-            'og_image' => ['nullable', 'image', 'max:10240'],
+            'og_image' => ['nullable', new ImageOrPath],
         ];
     }
 }

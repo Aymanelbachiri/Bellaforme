@@ -10,6 +10,6 @@ export type SharedData = {
     name: string;
     auth: Auth;
     sidebarOpen: boolean;
-    divisions: Pick<Division, 'id' | 'name' | 'slug'>[];
+    divisions: Pick<Division, 'id' | 'name' | 'slug' | 'phone' | 'facebook_url' | 'instagram_url' | 'linkedin_url' | 'youtube_url'>[];
     [key: string]: unknown;
 };

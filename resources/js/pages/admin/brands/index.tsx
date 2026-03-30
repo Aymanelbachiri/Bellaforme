@@ -6,8 +6,8 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Brand, PaginatedData } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Brands', href: '/admin/brands' },
+    { title: 'Tableau de bord', href: '/dashboard' },
+    { title: 'Marques', href: '/admin/brands' },
 ];
 
 export default function BrandsIndex({
@@ -19,24 +19,24 @@ export default function BrandsIndex({
 
     function handleDelete(brand: Brand) {
         dialog.confirm(
-            `Delete "${brand.name}"?`,
-            'This brand will be permanently deleted. This action cannot be undone.',
+            `Supprimer "${brand.name}" ?`,
+            'Cette marque sera définitivement supprimée. Cette action est irréversible.',
             () => router.delete(`/admin/brands/${brand.id}`),
         );
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Brands" />
+            <Head title="Marques" />
 
             <div className="space-y-6 p-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-xl font-semibold tracking-tight">
-                        Brands
+                        Marques
                     </h1>
                     <Button asChild>
                         <Link href="/admin/brands/create">
-                            Create Brand
+                            Créer une marque
                         </Link>
                     </Button>
                 </div>
@@ -49,7 +49,7 @@ export default function BrandsIndex({
                                     Logo
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
-                                    Name
+                                    Nom
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
                                     Division
@@ -58,16 +58,16 @@ export default function BrandsIndex({
                                     Slug
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
-                                    Partner
+                                    Partenaire
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
-                                    Reference
+                                    Référence
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
-                                    Order
+                                    Ordre
                                 </th>
                                 <th className="px-4 py-3 text-left font-medium">
-                                    Status
+                                    Statut
                                 </th>
                                 <th className="px-4 py-3 text-right font-medium">
                                     Actions
@@ -86,7 +86,7 @@ export default function BrandsIndex({
                                             />
                                         ) : (
                                             <div className="flex h-10 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
-                                                No logo
+                                                Pas de logo
                                             </div>
                                         )}
                                     </td>
@@ -109,7 +109,7 @@ export default function BrandsIndex({
                                                     : 'secondary'
                                             }
                                         >
-                                            {brand.is_partner ? 'Yes' : 'No'}
+                                            {brand.is_partner ? 'Oui' : 'Non'}
                                         </Badge>
                                     </td>
                                     <td className="px-4 py-3">
@@ -120,7 +120,7 @@ export default function BrandsIndex({
                                                     : 'secondary'
                                             }
                                         >
-                                            {brand.is_reference ? 'Yes' : 'No'}
+                                            {brand.is_reference ? 'Oui' : 'Non'}
                                         </Badge>
                                     </td>
                                     <td className="px-4 py-3">
@@ -135,8 +135,8 @@ export default function BrandsIndex({
                                             }
                                         >
                                             {brand.is_active
-                                                ? 'Active'
-                                                : 'Inactive'}
+                                                ? 'Actif'
+                                                : 'Inactif'}
                                         </Badge>
                                     </td>
                                     <td className="px-4 py-3 text-right">
@@ -149,7 +149,7 @@ export default function BrandsIndex({
                                                 <Link
                                                     href={`/admin/brands/${brand.id}/edit`}
                                                 >
-                                                    Edit
+                                                    Modifier
                                                 </Link>
                                             </Button>
                                             <Button
@@ -159,7 +159,7 @@ export default function BrandsIndex({
                                                     handleDelete(brand)
                                                 }
                                             >
-                                                Delete
+                                                Supprimer
                                             </Button>
                                         </div>
                                     </td>
@@ -171,7 +171,7 @@ export default function BrandsIndex({
                                         colSpan={9}
                                         className="px-4 py-8 text-center text-muted-foreground"
                                     >
-                                        No brands found.
+                                        Aucune marque trouvée.
                                     </td>
                                 </tr>
                             )}

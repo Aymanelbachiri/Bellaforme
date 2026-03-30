@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Rules\ImageOrPath;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,7 +23,7 @@ class UpdateBrandRequest extends FormRequest
             'division_ids.*' => ['exists:divisions,id'],
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('brands', 'slug')->ignore($this->route('brand'))],
-            'logo' => ['nullable', 'image', 'max:10240'],
+            'logo' => ['nullable', new ImageOrPath],
             'is_partner' => ['boolean'],
             'is_reference' => ['boolean'],
             'order' => ['integer'],

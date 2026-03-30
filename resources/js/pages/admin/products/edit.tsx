@@ -20,17 +20,23 @@ const textareaClass =
 
 interface SpecEntry { label: string; value: string; }
 
+type GalleryItem = File | { type: 'path'; path: string; url: string };
+
+function isGalleryFile(item: GalleryItem): item is File {
+    return item instanceof File;
+}
+
 export default function ProductsEdit({
     product, divisions, categories, brands,
 }: {
     product: Product;
     divisions: Pick<Division, 'id' | 'name'>[];
     categories: Pick<Category, 'id' | 'name' | 'division_id'>[];
-    brands: Pick<Brand, 'id' | 'name'>[];
+    brands: (Pick<Brand, 'id' | 'name'> & { divisions?: { id: number }[] })[];
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Products', href: '/admin/products' },
+        { title: 'Tableau de bord', href: '/dashboard' },
+        { title: 'Produits', href: '/admin/products' },
         { title: product.name, href: `/admin/products/${product.id}/edit` },
     ];
 
@@ -42,7 +48,7 @@ export default function ProductsEdit({
         name: string; slug: string; short_description: string; description: string;
         featured_image: File | null; brochure_file: File | null; video_url: string;
         order: number; is_active: boolean; specifications: SpecEntry[];
-        gallery: File[]; meta_title: string; meta_description: string; og_image: File | null;
+        gallery: GalleryItem[]; meta_title: string; meta_description: string; og_image: File | null;
         _method: 'PUT';
     }>({
         content_mode: product.content_mode,
@@ -67,11 +73,8 @@ export default function ProductsEdit({
         mediaPicker.openPicker({
             type: 'image', directory,
             onSelect: (file) => {
-                fetch(file.url).then((r) => r.blob()).then((blob) => {
-                    const f = new File([blob], file.name, { type: blob.type });
-                    setData(field, f);
-                    setPreviews((p) => ({ ...p, [field]: file.url }));
-                });
+                setData(field, file.path);
+                setPreviews((p) => ({ ...p, [field]: file.url }));
             },
             onUpload: (file) => {
                 setData(field, file);
@@ -84,11 +87,8 @@ export default function ProductsEdit({
         mediaPicker.openPicker({
             type: 'document', directory,
             onSelect: (file) => {
-                fetch(file.url).then((r) => r.blob()).then((blob) => {
-                    const f = new File([blob], file.name, { type: blob.type });
-                    setData(field, f);
-                    setPreviews((p) => ({ ...p, [field]: file.name }));
-                });
+                setData(field, file.path);
+                setPreviews((p) => ({ ...p, [field]: file.name }));
             },
             onUpload: (file) => {
                 setData(field, file);
@@ -102,9 +102,23 @@ export default function ProductsEdit({
         [categories, data.division_id],
     );
 
+    const filteredBrands = useMemo(
+        () => brands.filter((b) => b.divisions?.some((d) => d.id === Number(data.division_id))),
+        [brands, data.division_id],
+    );
+
     function handleSubmit(e: FormEvent) {
         e.preventDefault();
-        post(`/admin/products/${product.id}`, { forceFormData: true });
+        const galleryFiles = data.gallery.filter(isGalleryFile);
+        let fileIdx = 0;
+        const galleryOrder = data.gallery.map((item) =>
+            isGalleryFile(item) ? { type: 'file' as const, index: fileIdx++ } : { type: 'path' as const, path: item.path }
+        );
+        post(`/admin/products/${product.id}`, {
+            ...data,
+            gallery: galleryFiles,
+            gallery_order: JSON.stringify(galleryOrder),
+        }, { forceFormData: true });
     }
 
     function addSpec() { setData('specifications', [...data.specifications, { label: '', value: '' }]); }
@@ -120,9 +134,15 @@ export default function ProductsEdit({
         setData('specifications', updated);
     }
     function addGalleryFiles(files: FileList | null) {
-        if (!files) return; setData('gallery', [...data.gallery, ...Array.from(files)]);
+        if (!files) return;
+        setData('gallery', [...data.gallery, ...Array.from(files)]);
     }
-    function removeGalleryFile(index: number) { setData('gallery', data.gallery.filter((_, i) => i !== index)); }
+    function addGalleryFromMedia(file: { path: string; url: string }) {
+        setData('gallery', [...data.gallery, { type: 'path', path: file.path, url: file.url }]);
+    }
+    function removeGalleryFile(index: number) {
+        setData('gallery', data.gallery.filter((_, i) => i !== index));
+    }
     function moveGallery(index: number, direction: -1 | 1) {
         const target = index + direction;
         if (target < 0 || target >= data.gallery.length) return;
@@ -133,21 +153,21 @@ export default function ProductsEdit({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Edit ${product.name}`} />
+            <Head title={`Modifier ${product.name}`} />
             <div className="space-y-6 p-4">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-semibold tracking-tight">Edit Product</h1>
-                    <Button variant="outline" asChild><Link href="/admin/products">Back</Link></Button>
+                    <h1 className="text-xl font-semibold tracking-tight">Modifier le produit</h1>
+                    <Button variant="outline" asChild><Link href="/admin/products">Retour</Link></Button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Product Type */}
                     <Card>
-                        <CardHeader><CardTitle>Product Type</CardTitle></CardHeader>
+                        <CardHeader><CardTitle>Type de produit</CardTitle></CardHeader>
                         <CardContent>
                             <div className="flex gap-2">
-                                <Button type="button" variant={data.content_mode === 'detailed' ? 'default' : 'outline'} onClick={() => setData('content_mode', 'detailed')}>Full Product</Button>
-                                <Button type="button" variant={data.content_mode === 'brochure_only' ? 'default' : 'outline'} onClick={() => setData('content_mode', 'brochure_only')}>Catalog Only</Button>
+                                <Button type="button" variant={data.content_mode === 'detailed' ? 'default' : 'outline'} onClick={() => setData('content_mode', 'detailed')}>Produit complet</Button>
+                                <Button type="button" variant={data.content_mode === 'brochure_only' ? 'default' : 'outline'} onClick={() => setData('content_mode', 'brochure_only')}>Catalogue uniquement</Button>
                             </div>
                             <InputError message={errors.content_mode} />
                         </CardContent>
@@ -155,21 +175,21 @@ export default function ProductsEdit({
 
                     {/* Common Fields */}
                     <Card>
-                        <CardHeader><CardTitle>Product Details</CardTitle></CardHeader>
+                        <CardHeader><CardTitle>Détails du produit</CardTitle></CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="grid gap-2">
                                     <Label htmlFor="division_id">Division *</Label>
-                                    <select id="division_id" className={selectClass} value={data.division_id} onChange={(e) => { setData('division_id', e.target.value ? parseInt(e.target.value) : ''); setData('category_id', ''); }} required>
-                                        <option value="">Select a division</option>
+                                    <select id="division_id" className={selectClass} value={data.division_id} onChange={(e) => { setData('division_id', e.target.value ? parseInt(e.target.value) : ''); setData('category_id', ''); setData('brand_id', ''); }} required>
+                                        <option value="">Sélectionner une division</option>
                                         {divisions.map((d) => (<option key={d.id} value={d.id}>{d.name}</option>))}
                                     </select>
                                     <InputError message={errors.division_id} />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="category_id">Category *</Label>
+                                    <Label htmlFor="category_id">Catégorie *</Label>
                                     <select id="category_id" className={selectClass} value={data.category_id} onChange={(e) => setData('category_id', e.target.value ? parseInt(e.target.value) : '')} required>
-                                        <option value="">Select a category</option>
+                                        <option value="">Sélectionner une catégorie</option>
                                         {filteredCategories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
                                     </select>
                                     <InputError message={errors.category_id} />
@@ -177,15 +197,15 @@ export default function ProductsEdit({
                             </div>
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="brand_id">Brand</Label>
+                                    <Label htmlFor="brand_id">Marque</Label>
                                     <select id="brand_id" className={selectClass} value={data.brand_id} onChange={(e) => setData('brand_id', e.target.value ? parseInt(e.target.value) : '')}>
-                                        <option value="">None</option>
-                                        {brands.map((b) => (<option key={b.id} value={b.id}>{b.name}</option>))}
+                                        <option value="">Aucune</option>
+                                        {filteredBrands.map((b) => (<option key={b.id} value={b.id}>{b.name}</option>))}
                                     </select>
                                     <InputError message={errors.brand_id} />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="name">Name *</Label>
+                                    <Label htmlFor="name">Nom *</Label>
                                     <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} required />
                                     <InputError message={errors.name} />
                                 </div>
@@ -197,33 +217,38 @@ export default function ProductsEdit({
                                     <InputError message={errors.slug} />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="order">Order</Label>
+                                    <Label htmlFor="order">Ordre</Label>
                                     <Input id="order" type="number" value={data.order} onChange={(e) => setData('order', parseInt(e.target.value) || 0)} />
                                     <InputError message={errors.order} />
                                 </div>
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="short_description">Short Description *</Label>
-                                <textarea id="short_description" className={textareaClass} value={data.short_description} onChange={(e) => setData('short_description', e.target.value)} required />
+                                <Label htmlFor="short_description">Description courte</Label>
+                                <textarea
+                                    id="short_description"
+                                    className={textareaClass}
+                                    value={data.short_description}
+                                    onChange={(e) => setData('short_description', e.target.value)}
+                                />
                                 <InputError message={errors.short_description} />
                             </div>
 
                             <div className="grid gap-4 md:grid-cols-2">
                                 {/* Featured Image */}
                                 <div className="grid gap-2">
-                                    <Label>Featured Image</Label>
+                                    <Label>Image principale</Label>
                                     {previews.featured_image && (
                                         <img src={previews.featured_image} alt={product.name} className="h-24 w-40 rounded object-cover" />
                                     )}
                                     <Button type="button" variant="outline" className="w-fit gap-2" onClick={() => openImagePicker('featured_image', 'products')}>
                                         <ImageIcon className="h-4 w-4" />
-                                        {previews.featured_image ? 'Change Image' : 'Select Image'}
+                                        {previews.featured_image ? 'Changer l\'image' : 'Sélectionner une image'}
                                     </Button>
                                     <InputError message={errors.featured_image} />
                                 </div>
                                 <div className="flex items-end gap-2 pb-1">
                                     <Checkbox id="is_active" checked={data.is_active} onCheckedChange={(checked) => setData('is_active', checked === true)} />
-                                    <Label htmlFor="is_active">Active</Label>
+                                    <Label htmlFor="is_active">Actif</Label>
                                     <InputError message={errors.is_active} />
                                 </div>
                             </div>
@@ -234,7 +259,7 @@ export default function ProductsEdit({
                     {data.content_mode === 'detailed' && (
                         <>
                             <Card>
-                                <CardHeader><CardTitle>Detailed Content</CardTitle></CardHeader>
+                                <CardHeader><CardTitle>Contenu détaillé</CardTitle></CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="grid gap-2">
                                         <Label htmlFor="description">Description *</Label>
@@ -242,7 +267,7 @@ export default function ProductsEdit({
                                         <InputError message={errors.description} />
                                     </div>
                                     <div className="grid gap-2">
-                                        <Label htmlFor="video_url">Video URL</Label>
+                                        <Label htmlFor="video_url">URL vidéo</Label>
                                         <Input id="video_url" type="url" value={data.video_url} onChange={(e) => setData('video_url', e.target.value)} placeholder="https://www.youtube.com/watch?v=..." />
                                         <InputError message={errors.video_url} />
                                     </div>
@@ -253,12 +278,12 @@ export default function ProductsEdit({
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center justify-between">
-                                        Specifications
-                                        <Button type="button" variant="outline" size="sm" onClick={addSpec}>Add Specification</Button>
+                                        Spécifications
+                                        <Button type="button" variant="outline" size="sm" onClick={addSpec}>Ajouter une spécification</Button>
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
-                                    {data.specifications.length === 0 && <p className="text-sm text-muted-foreground">No specifications added yet.</p>}
+                                    {data.specifications.length === 0 && <p className="text-sm text-muted-foreground">Aucune spécification ajoutée.</p>}
                                     {data.specifications.map((spec, index) => (
                                         <div key={index} className="flex items-start gap-2">
                                             <div className="flex flex-col gap-1">
@@ -266,10 +291,10 @@ export default function ProductsEdit({
                                                 <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" disabled={index === data.specifications.length - 1} onClick={() => moveSpec(index, 1)}>↓</Button>
                                             </div>
                                             <div className="grid flex-1 gap-2 sm:grid-cols-2">
-                                                <Input placeholder="Label" value={spec.label} onChange={(e) => updateSpec(index, 'label', e.target.value)} />
-                                                <Input placeholder="Value" value={spec.value} onChange={(e) => updateSpec(index, 'value', e.target.value)} />
+                                                <Input placeholder="Libellé" value={spec.label} onChange={(e) => updateSpec(index, 'label', e.target.value)} />
+                                                <Input placeholder="Valeur" value={spec.value} onChange={(e) => updateSpec(index, 'value', e.target.value)} />
                                             </div>
-                                            <Button type="button" variant="destructive" size="sm" onClick={() => removeSpec(index)}>Remove</Button>
+                                            <Button type="button" variant="destructive" size="sm" onClick={() => removeSpec(index)}>Retirer</Button>
                                         </div>
                                     ))}
                                     <InputError message={errors.specifications} />
@@ -278,11 +303,11 @@ export default function ProductsEdit({
 
                             {/* Gallery */}
                             <Card>
-                                <CardHeader><CardTitle>Image Gallery</CardTitle></CardHeader>
+                                <CardHeader><CardTitle>Galerie d'images</CardTitle></CardHeader>
                                 <CardContent className="space-y-3">
                                     {product.images && product.images.length > 0 && (
                                         <div className="space-y-2">
-                                            <p className="text-sm font-medium">Current Images</p>
+                                            <p className="text-sm font-medium">Images actuelles</p>
                                             <div className="grid grid-cols-4 gap-2">
                                                 {product.images.map((img) => (
                                                     <div key={img.id} className="relative">
@@ -294,21 +319,27 @@ export default function ProductsEdit({
                                         </div>
                                     )}
                                     <div className="grid gap-2">
-                                        <Label>Add More Images</Label>
-                                        <Input type="file" accept="image/*" multiple onChange={(e) => addGalleryFiles(e.target.files)} />
+                                        <Label>Ajouter des images</Label>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Input type="file" accept="image/*" multiple className="max-w-xs" onChange={(e) => addGalleryFiles(e.target.files)} />
+                                            <Button type="button" variant="outline" size="sm" onClick={() => mediaPicker.openPicker({ type: 'image', directory: 'products/gallery', onSelect: (file) => { addGalleryFromMedia(file); mediaPicker.setOpen(false); }, onUpload: (file) => { setData('gallery', [...data.gallery, file]); mediaPicker.setOpen(false); } })}>
+                                                <ImageIcon className="mr-1.5 size-4" />
+                                                Choisir dans la médiathèque
+                                            </Button>
+                                        </div>
                                     </div>
                                     {data.gallery.length > 0 && (
                                         <div className="space-y-2">
-                                            <p className="text-sm font-medium">New Images to Upload</p>
-                                            {data.gallery.map((file, index) => (
+                                            <p className="text-sm font-medium">Nouvelles images à télécharger</p>
+                                            {data.gallery.map((item, index) => (
                                                 <div key={index} className="flex items-center gap-2 rounded border p-2">
                                                     <div className="flex flex-col gap-1">
                                                         <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" disabled={index === 0} onClick={() => moveGallery(index, -1)}>↑</Button>
                                                         <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" disabled={index === data.gallery.length - 1} onClick={() => moveGallery(index, 1)}>↓</Button>
                                                     </div>
-                                                    <img src={URL.createObjectURL(file)} alt={`New ${index + 1}`} className="h-12 w-16 rounded object-cover" />
-                                                    <span className="flex-1 truncate text-sm">{file.name}</span>
-                                                    <Button type="button" variant="destructive" size="sm" onClick={() => removeGalleryFile(index)}>Remove</Button>
+                                                    <img src={isGalleryFile(item) ? URL.createObjectURL(item) : item.url} alt={`New ${index + 1}`} className="h-12 w-16 rounded object-cover shrink-0" />
+                                                    <span className="flex-1 truncate text-sm">{isGalleryFile(item) ? item.name : item.path.split('/').pop() ?? item.path}</span>
+                                                    <Button type="button" variant="destructive" size="sm" onClick={() => removeGalleryFile(index)}>Retirer</Button>
                                                 </div>
                                             ))}
                                         </div>
@@ -319,56 +350,54 @@ export default function ProductsEdit({
                         </>
                     )}
 
-                    {/* Brochure-only */}
-                    {data.content_mode === 'brochure_only' && (
-                        <Card>
-                            <CardHeader><CardTitle>Brochure</CardTitle></CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid gap-2">
-                                    <Label>Brochure File (PDF)</Label>
-                                    {previews.brochure_file && (
-                                        <p className="text-sm text-muted-foreground">
-                                            {product.brochure_file && !data.brochure_file ? (
-                                                <a href={`/storage/${product.brochure_file}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">View current brochure</a>
-                                            ) : (
-                                                <>Selected: {previews.brochure_file}</>
-                                            )}
-                                        </p>
-                                    )}
-                                    <Button type="button" variant="outline" className="w-fit gap-2" onClick={() => openDocPicker('brochure_file', 'products')}>
-                                        <FileIcon className="h-4 w-4" />
-                                        {previews.brochure_file ? 'Change File' : 'Select File'}
-                                    </Button>
-                                    <InputError message={errors.brochure_file} />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
+                    {/* Brochure */}
+                    <Card>
+                        <CardHeader><CardTitle>Brochure</CardTitle></CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid gap-2">
+                                <Label>Fichier brochure (PDF){data.content_mode === 'brochure_only' ? ' *' : ''}</Label>
+                                {previews.brochure_file && (
+                                    <p className="text-sm text-muted-foreground">
+                                        {product.brochure_file && !data.brochure_file ? (
+                                            <a href={`/storage/${product.brochure_file}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Voir la brochure actuelle</a>
+                                        ) : (
+                                            <>Sélectionné : {previews.brochure_file}</>
+                                        )}
+                                    </p>
+                                )}
+                                <Button type="button" variant="outline" className="w-fit gap-2" onClick={() => openDocPicker('brochure_file', 'products')}>
+                                    <FileIcon className="h-4 w-4" />
+                                    {previews.brochure_file ? 'Changer le fichier' : 'Sélectionner un fichier'}
+                                </Button>
+                                <InputError message={errors.brochure_file} />
+                            </div>
+                        </CardContent>
+                    </Card>
 
                     {/* SEO */}
                     <Card>
-                        <CardHeader><CardTitle>SEO Metadata</CardTitle></CardHeader>
+                        <CardHeader><CardTitle>Métadonnées SEO</CardTitle></CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="meta_title">Meta Title</Label>
+                                    <Label htmlFor="meta_title">Titre Meta</Label>
                                     <Input id="meta_title" value={data.meta_title} onChange={(e) => setData('meta_title', e.target.value)} />
                                     <InputError message={errors.meta_title} />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label>OG Image</Label>
+                                    <Label>Image OG</Label>
                                     {previews.og_image && (
                                         <img src={previews.og_image} alt="OG image" className="h-16 w-28 rounded object-cover" />
                                     )}
                                     <Button type="button" variant="outline" className="w-fit gap-2" onClick={() => openImagePicker('og_image', 'seo')}>
                                         <ImageIcon className="h-4 w-4" />
-                                        {previews.og_image ? 'Change Image' : 'Select Image'}
+                                        {previews.og_image ? 'Changer l\'image' : 'Sélectionner une image'}
                                     </Button>
                                     <InputError message={errors.og_image} />
                                 </div>
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="meta_description">Meta Description</Label>
+                                <Label htmlFor="meta_description">Description Meta</Label>
                                 <textarea id="meta_description" className={textareaClass} value={data.meta_description} onChange={(e) => setData('meta_description', e.target.value)} />
                                 <InputError message={errors.meta_description} />
                             </div>
@@ -376,7 +405,7 @@ export default function ProductsEdit({
                     </Card>
 
                     <div className="flex justify-end">
-                        <Button type="submit" disabled={processing}>{processing ? 'Saving...' : 'Update Product'}</Button>
+                        <Button type="submit" disabled={processing}>{processing ? 'Enregistrement...' : 'Mettre à jour le produit'}</Button>
                     </div>
                 </form>
             </div>

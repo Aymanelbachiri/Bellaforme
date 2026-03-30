@@ -35,12 +35,11 @@ class DivisionController extends Controller
     {
         $data = $request->validated();
 
-        // Handle hero_image upload
-        $data['hero_image'] = $this->imageOptimizer->optimize($request->file('hero_image'), 'divisions');
+        $data['hero_image'] = $this->imageOptimizer->resolveImage($request, 'hero_image', 'divisions');
 
-        // Handle homepage_image upload
-        if ($request->hasFile('homepage_image')) {
-            $data['homepage_image'] = $this->imageOptimizer->optimize($request->file('homepage_image'), 'divisions');
+        $homepageImage = $this->imageOptimizer->resolveImage($request, 'homepage_image', 'divisions');
+        if ($homepageImage) {
+            $data['homepage_image'] = $homepageImage;
         }
 
         // Extract SEO fields
@@ -72,20 +71,20 @@ class DivisionController extends Controller
     {
         $data = $request->validated();
 
-        // Handle hero_image upload if a new one is provided
-        if ($request->hasFile('hero_image')) {
+        $resolvedHero = $this->imageOptimizer->resolveImage($request, 'hero_image', 'divisions');
+        if ($resolvedHero && $resolvedHero !== $division->hero_image) {
             $this->imageOptimizer->delete($division->hero_image);
-            $data['hero_image'] = $this->imageOptimizer->optimize($request->file('hero_image'), 'divisions');
+            $data['hero_image'] = $resolvedHero;
         } else {
             unset($data['hero_image']);
         }
 
-        // Handle homepage_image upload if a new one is provided
-        if ($request->hasFile('homepage_image')) {
+        $resolvedHomepage = $this->imageOptimizer->resolveImage($request, 'homepage_image', 'divisions');
+        if ($resolvedHomepage && $resolvedHomepage !== $division->homepage_image) {
             if ($division->homepage_image) {
                 $this->imageOptimizer->delete($division->homepage_image);
             }
-            $data['homepage_image'] = $this->imageOptimizer->optimize($request->file('homepage_image'), 'divisions');
+            $data['homepage_image'] = $resolvedHomepage;
         } else {
             unset($data['homepage_image']);
         }
@@ -136,8 +135,9 @@ class DivisionController extends Controller
             'og_image' => null,
         ];
 
-        if ($request->hasFile('og_image')) {
-            $seoData['og_image'] = $this->imageOptimizer->optimize($request->file('og_image'), 'seo');
+        $resolvedOg = $this->imageOptimizer->resolveImage($request, 'og_image', 'seo');
+        if ($resolvedOg) {
+            $seoData['og_image'] = $resolvedOg;
         }
 
         return $seoData;

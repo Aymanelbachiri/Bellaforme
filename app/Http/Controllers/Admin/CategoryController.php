@@ -37,8 +37,17 @@ class CategoryController extends Controller
     {
         $data = $request->validated();
 
-        // Handle image upload
-        $data['image'] = $this->imageOptimizer->optimize($request->file('image'), 'categories');
+        $data['image'] = $this->imageOptimizer->resolveImage($request, 'image', 'categories');
+
+        $heroImage = $this->imageOptimizer->resolveImage($request, 'hero_image', 'categories');
+        if ($heroImage) {
+            $data['hero_image'] = $heroImage;
+        }
+
+        $videoCover = $this->imageOptimizer->resolveImage($request, 'video_cover', 'categories');
+        if ($videoCover) {
+            $data['video_cover'] = $videoCover;
+        }
 
         // Extract SEO fields
         $seoData = $this->extractSeoData($data, $request);
@@ -70,12 +79,32 @@ class CategoryController extends Controller
     {
         $data = $request->validated();
 
-        // Handle image upload if a new one is provided
-        if ($request->hasFile('image')) {
+        $resolvedImage = $this->imageOptimizer->resolveImage($request, 'image', 'categories');
+        if ($resolvedImage && $resolvedImage !== $category->image) {
             $this->imageOptimizer->delete($category->image);
-            $data['image'] = $this->imageOptimizer->optimize($request->file('image'), 'categories');
+            $data['image'] = $resolvedImage;
         } else {
             unset($data['image']);
+        }
+
+        $resolvedHero = $this->imageOptimizer->resolveImage($request, 'hero_image', 'categories');
+        if ($resolvedHero && $resolvedHero !== $category->hero_image) {
+            if ($category->hero_image) {
+                $this->imageOptimizer->delete($category->hero_image);
+            }
+            $data['hero_image'] = $resolvedHero;
+        } else {
+            unset($data['hero_image']);
+        }
+
+        $resolvedCover = $this->imageOptimizer->resolveImage($request, 'video_cover', 'categories');
+        if ($resolvedCover && $resolvedCover !== $category->video_cover) {
+            if ($category->video_cover) {
+                $this->imageOptimizer->delete($category->video_cover);
+            }
+            $data['video_cover'] = $resolvedCover;
+        } else {
+            unset($data['video_cover']);
         }
 
         // Extract SEO fields
@@ -102,6 +131,16 @@ class CategoryController extends Controller
             $this->imageOptimizer->delete($category->image);
         }
 
+        // Delete hero image
+        if ($category->hero_image) {
+            $this->imageOptimizer->delete($category->hero_image);
+        }
+
+        // Delete video cover
+        if ($category->video_cover) {
+            $this->imageOptimizer->delete($category->video_cover);
+        }
+
         // Delete og_image if it exists
         if ($category->seo && $category->seo->og_image) {
             $this->imageOptimizer->delete($category->seo->og_image);
@@ -123,8 +162,9 @@ class CategoryController extends Controller
             'og_image' => null,
         ];
 
-        if ($request->hasFile('og_image')) {
-            $seoData['og_image'] = $this->imageOptimizer->optimize($request->file('og_image'), 'seo');
+        $resolvedOg = $this->imageOptimizer->resolveImage($request, 'og_image', 'seo');
+        if ($resolvedOg) {
+            $seoData['og_image'] = $resolvedOg;
         }
 
         return $seoData;

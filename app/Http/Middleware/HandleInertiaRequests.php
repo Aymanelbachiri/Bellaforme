@@ -43,7 +43,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'divisions' => fn () => Division::active()->get(['id', 'name', 'slug']),
+            'divisions' => fn () => Division::active()->get(['id', 'name', 'slug', 'phone', 'facebook_url', 'instagram_url', 'linkedin_url', 'youtube_url']),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

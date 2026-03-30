@@ -14,7 +14,7 @@ class ProductController extends Controller
         $product = Product::where('slug', $slug)
             ->where('content_mode', 'detailed')
             ->where('is_active', true)
-            ->with(['images' => fn ($q) => $q->orderBy('order'), 'specifications' => fn ($q) => $q->orderBy('order'), 'brand'])
+            ->with(['images' => fn ($q) => $q->orderBy('order'), 'specifications' => fn ($q) => $q->orderBy('order'), 'brand', 'category.division'])
             ->firstOrFail();
 
         $seoData = $product->getSeoData();

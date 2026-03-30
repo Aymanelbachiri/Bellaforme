@@ -6,8 +6,8 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, PaginatedData, Product } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Products', href: '/admin/products' },
+    { title: 'Tableau de bord', href: '/dashboard' },
+    { title: 'Produits', href: '/admin/products' },
 ];
 
 export default function ProductsIndex({
@@ -19,24 +19,24 @@ export default function ProductsIndex({
 
     function handleDelete(product: Product) {
         dialog.confirm(
-            `Delete "${product.name}"?`,
-            'This product will be permanently deleted. This action cannot be undone.',
+            `Supprimer "${product.name}" ?`,
+            'Ce produit sera définitivement supprimé. Cette action est irréversible.',
             () => router.delete(`/admin/products/${product.id}`),
         );
     }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Products" />
+            <Head title="Produits" />
 
             <div className="space-y-6 p-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-xl font-semibold tracking-tight">
-                        Products
+                        Produits
                     </h1>
                     <Button asChild>
                         <Link href="/admin/products/create">
-                            Create Product
+                            Créer un produit
                         </Link>
                     </Button>
                 </div>
@@ -46,13 +46,13 @@ export default function ProductsIndex({
                         <thead className="border-b bg-muted/50">
                             <tr>
                                 <th className="px-4 py-3 text-left font-medium">Image</th>
-                                <th className="px-4 py-3 text-left font-medium">Name</th>
+                                <th className="px-4 py-3 text-left font-medium">Nom</th>
                                 <th className="px-4 py-3 text-left font-medium">Type</th>
                                 <th className="px-4 py-3 text-left font-medium">Division</th>
-                                <th className="px-4 py-3 text-left font-medium">Category</th>
-                                <th className="px-4 py-3 text-left font-medium">Brand</th>
-                                <th className="px-4 py-3 text-left font-medium">Order</th>
-                                <th className="px-4 py-3 text-left font-medium">Status</th>
+                                <th className="px-4 py-3 text-left font-medium">Catégorie</th>
+                                <th className="px-4 py-3 text-left font-medium">Marque</th>
+                                <th className="px-4 py-3 text-left font-medium">Ordre</th>
+                                <th className="px-4 py-3 text-left font-medium">Statut</th>
                                 <th className="px-4 py-3 text-right font-medium">Actions</th>
                             </tr>
                         </thead>
@@ -68,14 +68,14 @@ export default function ProductsIndex({
                                             />
                                         ) : (
                                             <div className="flex h-10 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
-                                                No image
+                                            Pas d'image
                                             </div>
                                         )}
                                     </td>
                                     <td className="px-4 py-3 font-medium">{product.name}</td>
                                     <td className="px-4 py-3">
                                         <Badge variant={product.content_mode === 'detailed' ? 'default' : 'outline'}>
-                                            {product.content_mode === 'detailed' ? 'Full' : 'Catalog'}
+                                            {product.content_mode === 'detailed' ? 'Complet' : 'Catalogue'}
                                         </Badge>
                                     </td>
                                     <td className="px-4 py-3 text-muted-foreground">
@@ -90,20 +90,20 @@ export default function ProductsIndex({
                                     <td className="px-4 py-3">{product.order}</td>
                                     <td className="px-4 py-3">
                                         <Badge variant={product.is_active ? 'default' : 'secondary'}>
-                                            {product.is_active ? 'Active' : 'Inactive'}
+                                            {product.is_active ? 'Actif' : 'Inactif'}
                                         </Badge>
                                     </td>
                                     <td className="px-4 py-3 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <Button variant="outline" size="sm" asChild>
-                                                <Link href={`/admin/products/${product.id}/edit`}>Edit</Link>
+                                                <Link href={`/admin/products/${product.id}/edit`}>Modifier</Link>
                                             </Button>
                                             <Button
                                                 variant="destructive"
                                                 size="sm"
                                                 onClick={() => handleDelete(product)}
                                             >
-                                                Delete
+                                                Supprimer
                                             </Button>
                                         </div>
                                     </td>
@@ -112,7 +112,7 @@ export default function ProductsIndex({
                             {products.data.length === 0 && (
                                 <tr>
                                     <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
-                                        No products found.
+                                        Aucun produit trouvé.
                                     </td>
                                 </tr>
                             )}

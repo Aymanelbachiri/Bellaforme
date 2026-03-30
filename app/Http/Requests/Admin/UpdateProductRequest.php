@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Rules\ImageOrPath;
+use App\Rules\PdfFileOrPath;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -36,10 +38,10 @@ class UpdateProductRequest extends FormRequest
             'brand_id' => ['nullable', 'exists:brands,id'],
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('products', 'slug')->ignore($this->route('product'))],
-            'short_description' => ['required', 'string'],
-            'featured_image' => ['nullable', 'image', 'max:10240'],
-            'description' => ['required_if:content_mode,detailed', 'nullable', 'string'],
-            'brochure_file' => ['nullable', 'file', 'mimes:pdf', 'max:61440'],
+            'short_description' => ['nullable', 'string'],
+            'featured_image' => ['nullable', new ImageOrPath],
+            'description' => ['nullable', 'string'],
+            'brochure_file' => ['nullable', new PdfFileOrPath],
             'video_url' => ['nullable', 'url'],
             'is_active' => ['boolean'],
             'order' => ['integer'],
@@ -48,10 +50,11 @@ class UpdateProductRequest extends FormRequest
             'specifications.*.value' => ['required_with:specifications', 'string'],
             'gallery' => ['nullable', 'array'],
             'gallery.*' => ['image'],
+            'gallery_order' => ['nullable', 'string'],
             // SEO fields
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string'],
-            'og_image' => ['nullable', 'image', 'max:10240'],
+            'og_image' => ['nullable', new ImageOrPath],
         ];
     }
 }

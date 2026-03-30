@@ -2,11 +2,12 @@ interface OptimizedImageProps {
     src: string;
     alt: string;
     loading?: 'lazy' | 'eager';
+    fetchPriority?: 'high' | 'low' | 'auto';
     className?: string;
     sizes?: string;
 }
 
-function getAvifUrl(src: string): string {
+export function getAvifUrl(src: string): string {
     const lastDot = src.lastIndexOf('.');
     if (lastDot === -1) return `${src}.avif`;
     return `${src.substring(0, lastDot)}.avif`;
@@ -16,6 +17,7 @@ export default function OptimizedImage({
     src,
     alt,
     loading = 'lazy',
+    fetchPriority,
     className,
     sizes,
 }: OptimizedImageProps) {
@@ -32,6 +34,8 @@ export default function OptimizedImage({
                 src={src}
                 alt={alt}
                 loading={loading}
+                fetchPriority={fetchPriority}
+                decoding="async"
                 className={className}
             />
         </picture>

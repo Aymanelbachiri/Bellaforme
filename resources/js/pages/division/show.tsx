@@ -1,5 +1,7 @@
-import { Link } from '@inertiajs/react';
-import OptimizedImage from '@/components/optimized-image';
+import { Head, Link } from '@inertiajs/react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import OptimizedImage, { getAvifUrl } from '@/components/optimized-image';
 import SeoHead from '@/components/seo-head';
 import PublicLayout from '@/layouts/public-layout';
 import type { Brand, Category, Division, SeoData } from '@/types/models';
@@ -19,13 +21,28 @@ export default function DivisionShow({
     partnerBrands,
     seo,
 }: DivisionShowProps) {
+    const heroImageUrl = division.hero_image ? `/storage/${division.hero_image}` : null;
+    const heroAvifUrl = heroImageUrl ? getAvifUrl(heroImageUrl) : null;
+    const aboveFoldCategoryImages = categories
+        .filter((c) => c.image)
+        .slice(0, 4)
+        .map((c) => getAvifUrl(`/storage/${c.image}`));
+
     return (
         <PublicLayout>
             <SeoHead {...seo} />
+            <Head>
+                {heroAvifUrl && (
+                    <link rel="preload" href={heroAvifUrl} as="image" type="image/avif" />
+                )}
+                {aboveFoldCategoryImages.map((url) => (
+                    <link key={url} rel="preload" href={url} as="image" type="image/avif" />
+                ))}
+            </Head>
             <HeroSection division={division} />
             <CategoryGrid categories={categories} divisionSlug={division.slug} />
             {referenceBrands.length > 0 && (
-                <BrandCarousel title="Nos Références" brands={referenceBrands} />
+                <BrandCarousel title="Nos références" brands={referenceBrands} />
             )}
             {partnerBrands.length > 0 && (
                 <BrandCarousel title="Nos Marques Partenaires" brands={partnerBrands} />
@@ -45,14 +62,18 @@ function HeroSection({ division }: { division: Division }) {
                         src={bgImage}
                         alt={division.name}
                         loading="eager"
-                        className="h-full w-full object-cover opacity-60"
+                        fetchPriority="high"
+                        className="h-full w-full object-cover opacity-70"
                         sizes="100vw"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
                 </div>
             )}
-            <div className="relative z-10 mx-auto max-w-4xl px-4 text-center text-white">
+            <div className="relative z-10 mx-auto max-w-5xl px-4 text-center text-white entrance-fade-up">
                 {division.hero_title && (
-                    <h1 className="mb-4 text-4xl font-bold leading-tight md:text-5xl">
+                    <h1 className="mb-4 text-3xl font-bold leading-tight sm:text-4xl md:text-7xl glow-text"
+                        style={ {fontFamily:"'Manrope', sans-serif", fontWeight:'bold'}}
+                    >
                         {division.hero_title}
                     </h1>
                 )}
@@ -72,15 +93,18 @@ function CategoryGrid({ categories, divisionSlug }: { categories: Category[]; di
     return (
         <section className="bg-black py-16">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <h2 className="mb-10 text-center text-3xl font-bold text-white">
+                <h2 className="mb-10 text-center text-3xl font-bold text-white entrance-fade-up"
+                    style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 'bold' }}
+                >
                     Découvrez l'univers de nos produits
                 </h2>
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                    {categories.map((category) => (
+                <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+                    {categories.map((category, index) => (
                         <CategoryCard
                             key={category.id}
                             category={category}
                             divisionSlug={divisionSlug}
+                            style={{ animationDelay: `${index * 80}ms` }}
                         />
                     ))}
                 </div>
@@ -89,58 +113,149 @@ function CategoryGrid({ categories, divisionSlug }: { categories: Category[]; di
     );
 }
 
-function CategoryCard({ category, divisionSlug }: { category: Category; divisionSlug: string }) {
+function CategoryCard({ category, divisionSlug, style }: { category: Category; divisionSlug: string; style?: React.CSSProperties }) {
     return (
-        <div className="group overflow-hidden rounded-xl border bg-black shadow-sm transition-shadow hover:shadow-md">
-            <div className="aspect-[4/3] overflow-hidden">
+        <div
+            className="group relative overflow-hidden shadow-sm transition-shadow hover:shadow-md entrance-fade-up opacity-0"
+            style={style}
+        >
+            <div className="relative aspect-[3/4]">
                 {category.image ? (
                     <OptimizedImage
                         src={`/storage/${category.image}`}
                         alt={category.name}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        loading="eager"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     />
                 ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gray-800 text-gray-500">
+                    <div className="flex h-full w-full items-center justify-center bg-gray-900 text-white">
                         {category.name}
                     </div>
                 )}
-            </div>
-            <div className="p-5 text-center">
-                <h3 className="mb-4 text-lg font-semibold text-white">{category.name}</h3>
-                <Link
-                    href={`/${divisionSlug}/category/${category.slug}`}
-                    className="inline-block rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-black transition-colors glow-btn hover:bg-white/80"
-                >
-                    Explorer
-                </Link>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
+                    <h3 className="mb-3 text-xs font-semibold text-white font-poppins sm:mb-5 sm:text-sm">
+                        {category.name}
+                    </h3>
+                    <Link
+                        href={`/${divisionSlug}/category/${category.slug}`}
+                        className="inline-block rounded-full bg-white px-3 py-1 text-[10px] font-bold text-black transition-colors glow-btn hover:bg-[#d5ab70] hover:text-white font-poppins sm:px-4 sm:py-1.5 sm:text-xs"
+                    >
+                        Explorer &gt;
+                    </Link>
+                </div>
             </div>
         </div>
     );
 }
 
 function BrandCarousel({ title, brands }: { title: string; brands: Brand[] }) {
-    // Duplicate the list so the marquee can loop seamlessly
-    const items = [...brands, ...brands];
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const pausedRef = useRef(false);
+
+    // Infinite auto-scroll, pauses on hover, resumes on mouse leave
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        let animId: number;
+        let lastTime = 0;
+        let accumulated = 0;
+        const pxPerSecond = 60;
+
+        const step = (time: number) => {
+            if (lastTime) {
+                const delta = time - lastTime;
+                if (!pausedRef.current && el) {
+                    accumulated += (pxPerSecond * delta) / 1000;
+                    if (accumulated >= 1) {
+                        const px = Math.floor(accumulated);
+                        el.scrollLeft += px;
+                        accumulated -= px;
+                        if (el.scrollLeft >= el.scrollWidth / 2) {
+                            el.scrollLeft = 0;
+                        }
+                    }
+                }
+            }
+            lastTime = time;
+            animId = requestAnimationFrame(step);
+        };
+        animId = requestAnimationFrame(step);
+        return () => cancelAnimationFrame(animId);
+    }, []);
+
+    const isManualScrolling = useRef(false);
+
+    const scroll = (direction: 'left' | 'right') => {
+        if (!scrollRef.current || isManualScrolling.current) return;
+        isManualScrolling.current = true;
+        pausedRef.current = true;
+
+        const el = scrollRef.current;
+        const logoWidth = 180 + 8; // minWidth + gap
+        const target = direction === 'right' ? el.scrollLeft + logoWidth : el.scrollLeft - logoWidth;
+        const start = el.scrollLeft;
+        const distance = target - start;
+        const duration = 400;
+        let startTime: number | null = null;
+
+        const animate = (time: number) => {
+            if (!startTime) startTime = time;
+            const elapsed = time - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out cubic
+            const ease = 1 - Math.pow(1 - progress, 3);
+            el.scrollLeft = start + distance * ease;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                isManualScrolling.current = false;
+            }
+        };
+        requestAnimationFrame(animate);
+    };
+
+    // Duplicate so user can scroll far in both directions
+    const items = [...brands, ...brands, ...brands, ...brands];
 
     return (
         <section className="bg-black py-12">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <h2 className="mb-8 text-center text-2xl font-bold text-white">{title}</h2>
-                <div className="brand-marquee-wrapper overflow-hidden py-8">
-                    <div className="brand-marquee flex gap-2">
+                <h2 className="mb-10 text-center text-xl font-poppins font-black text-white uppercase sm:mb-20 sm:text-2xl">{title}</h2>
+            </div>
+            <div className="bg-[#1a1a1a]">
+                <div className="mx-auto flex max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+                    {/* Prev */}
+                    <button
+                        onClick={() => scroll('left')}
+                        className="shrink-0 pr-4 text-white min-w-[44px] min-h-[44px]"
+                        aria-label="Précédent"
+                    >
+                        <ChevronLeft className="size-10" strokeWidth={3} />
+                    </button>
+
+                    <div className="brand-marquee-wrapper flex-1 overflow-hidden">
+                    <div
+                        ref={scrollRef}
+                        className="scrollbar-hide flex gap-2 overflow-x-auto py-8"
+                        onMouseEnter={() => { pausedRef.current = true; }}
+                        onMouseLeave={() => { pausedRef.current = false; }}
+                    >
                         {items.map((brand, i) => (
                             <div
                                 key={`${brand.id}-${i}`}
-                                className="flex shrink-0 items-center justify-center"
-                                style={{ minWidth: '180px', height: '130px' }}
+                                className="flex shrink-0 items-center justify-center min-w-[120px] sm:min-w-[180px]"
+                                style={{ height: '130px' }}
                             >
                                 {brand.logo ? (
                                     <img
                                         src={`/storage/${brand.logo}`}
                                         alt={brand.name}
+                                        loading="eager"
+                                        decoding="async"
                                         className="max-h-28 max-w-[260px] object-contain"
-                                        loading="lazy"
                                     />
                                 ) : (
                                     <span className="text-sm font-medium text-gray-400">{brand.name}</span>
@@ -148,6 +263,16 @@ function BrandCarousel({ title, brands }: { title: string; brands: Brand[] }) {
                             </div>
                         ))}
                     </div>
+                    </div>
+
+                    {/* Next */}
+                    <button
+                        onClick={() => scroll('right')}
+                        className="shrink-0 pl-4 text-white min-w-[44px] min-h-[44px]"
+                        aria-label="Suivant"
+                    >
+                        <ChevronRight className="size-10" strokeWidth={3} />
+                    </button>
                 </div>
             </div>
         </section>

@@ -22,7 +22,7 @@ export default defineConfig({
         }),
     ],
     server: {
-        allowedHosts: ['homedev4.preview-web.site'],
+        allowedHosts: ['homedev4.preview-web.site','localhost'],
     },
     esbuild: {
         jsx: 'automatic',

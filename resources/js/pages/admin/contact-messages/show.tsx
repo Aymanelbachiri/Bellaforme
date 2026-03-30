@@ -5,9 +5,9 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, ContactMessage } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Contact Messages', href: '/admin/contact-messages' },
-    { title: 'View Message', href: '#' },
+    { title: 'Tableau de bord', href: '/dashboard' },
+    { title: 'Messages de contact', href: '/admin/contact-messages' },
+    { title: 'Voir le message', href: '#' },
 ];
 
 function Field({ label, value }: { label: string; value: string | null | undefined }) {
@@ -27,43 +27,43 @@ export default function ContactMessageShow({
 }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Message from ${contactMessage.name}`} />
+            <Head title={`Message de ${contactMessage.name}`} />
 
             <div className="space-y-6 p-4">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="sm" asChild>
-                        <Link href="/admin/contact-messages">← Back to list</Link>
+                        <Link href="/admin/contact-messages">← Retour à la liste</Link>
                     </Button>
                     <h1 className="text-xl font-semibold tracking-tight">
-                        Message from {contactMessage.name}
+                        Message de {contactMessage.name}
                     </h1>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Contact Information</CardTitle>
+                            <CardTitle>Informations de contact</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <dl className="space-y-4">
-                                <Field label="Name" value={contactMessage.name} />
-                                <Field label="Email" value={contactMessage.email} />
-                                <Field label="Phone" value={contactMessage.phone} />
-                                <Field label="City" value={contactMessage.city} />
+                                <Field label="Nom" value={contactMessage.name} />
+                                <Field label="E-mail" value={contactMessage.email} />
+                                <Field label="Téléphone" value={contactMessage.phone} />
+                                <Field label="Ville" value={contactMessage.city} />
                             </dl>
                         </CardContent>
                     </Card>
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Request Details</CardTitle>
+                            <CardTitle>Détails de la demande</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <dl className="space-y-4">
-                                <Field label="Activity Type" value={contactMessage.activity_type} />
-                                <Field label="Project Nature" value={contactMessage.project_nature} />
-                                <Field label="Equipment Timeline" value={contactMessage.equipment_timeline} />
-                                <Field label="Request Reason" value={contactMessage.request_reason} />
+                                <Field label="Type d'activité" value={contactMessage.activity_type} />
+                                <Field label="Nature du projet" value={contactMessage.project_nature} />
+                                <Field label="Délai d'équipement" value={contactMessage.equipment_timeline} />
+                                <Field label="Motif de la demande" value={contactMessage.request_reason} />
                             </dl>
                         </CardContent>
                     </Card>
@@ -81,7 +81,7 @@ export default function ContactMessageShow({
                 {contactMessage.product && (
                     <Card>
                         <CardHeader>
-                            <CardTitle>Linked Product</CardTitle>
+                            <CardTitle>Produit associé</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="flex items-center gap-4">
@@ -104,7 +104,7 @@ export default function ContactMessageShow({
                 )}
 
                 <div className="text-sm text-muted-foreground">
-                    Received on{' '}
+                    Reçu le{' '}
                     {new Date(contactMessage.created_at).toLocaleDateString('fr-FR', {
                         day: '2-digit',
                         month: '2-digit',

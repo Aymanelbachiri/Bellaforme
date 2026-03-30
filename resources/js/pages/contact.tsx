@@ -1,7 +1,9 @@
 import { useForm, usePage } from '@inertiajs/react';
+import { Mail, MapPin, Phone } from 'lucide-react';
 import { type FormEvent } from 'react';
 import SeoHead from '@/components/seo-head';
 import PublicLayout from '@/layouts/public-layout';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { SeoData } from '@/types/models';
 
 interface ContactProps {
@@ -52,9 +54,9 @@ export default function Contact({ product_id, seo }: ContactProps) {
             <section className="bg-black py-16">
                 <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                     <div className="mb-10 text-center">
-                        <h1 className="text-3xl font-bold text-white md:text-4xl">Contactez-nous</h1>
-                        <p className="mt-3 text-gray-400">
-                            Remplissez le formulaire ci-dessous et nous vous répondrons dans les plus brefs délais.
+                        <h1 className="text-4xl font-bold glow-text text-white md:text-4xl">Contactez-nous</h1>
+                        <p className="mt-3 text-white font-manrope font-light">
+                            Besoin d'informations ou de conseils ?
                         </p>
                     </div>
 
@@ -65,6 +67,71 @@ export default function Contact({ product_id, seo }: ContactProps) {
                     )}
 
                     <ContactForm productId={product_id} />
+                </div>
+            </section>
+            <section className="bg-[#1a1a1a] py-12">
+                <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 gap-8 md:grid-cols-3 md:divide-x md:divide-white/20">
+                        {/* Showroom Beauty & Medical */}
+                        <div>
+                            <h3 className="mb-4 text-lg font-bold text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                                Showroom Beauty & medical :
+                            </h3>
+                            <ul className="space-y-2 text-sm text-white/80">
+                                <li className="flex items-start gap-2">
+                                    <Phone className="mt-0.5 size-4 shrink-0" />
+                                    <a href="tel:+212522258481" className="hover:text-[#d5ab70] transition-colors">+212 522 258 481</a>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <Mail className="mt-0.5 size-4 shrink-0" />
+                                    <a href="mailto:Serviceclient@bellaforme.ma" className="hover:text-[#d5ab70] transition-colors">Serviceclient@bellaforme.ma</a>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <MapPin className="mt-0.5 size-4 shrink-0" />
+                                    <a href="https://maps.google.com/?q=20100+Angle+rue+Ibnou+Katir+et+Ibnou+Habous+Maarif+Casablanca+MAROC" target="_blank" rel="noopener noreferrer" className="hover:text-[#d5ab70] transition-colors">20100, Angle rue Ibnou Katir et Ibnou Habous Maârif. Casablanca | MAROC</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Showroom Fitness */}
+                        <div className="md:pl-8">
+                            <h3 className="mb-4 text-lg font-bold text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                                Showroom Fitness :
+                            </h3>
+                            <ul className="space-y-2 text-sm text-white/80">
+                                <li className="flex items-start gap-2">
+                                    <Phone className="mt-0.5 size-4 shrink-0" />
+                                    <a href="tel:+21252235767" className="hover:text-[#d5ab70] transition-colors">05 222-35767</a>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <Mail className="mt-0.5 size-4 shrink-0" />
+                                    <a href="mailto:serviceclient@bellaforme.ma" className="hover:text-[#d5ab70] transition-colors">serviceclient@bellaforme.ma</a>
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <MapPin className="mt-0.5 size-4 shrink-0" />
+                                    <a href="https://maps.google.com/?q=29+Rue+Ali+Abderrazak+Casablanca+20250" target="_blank" rel="noopener noreferrer" className="hover:text-[#d5ab70] transition-colors">29 Rue Ali Abderrazak, à côté de pharmacie hyper, Casablanca 20250</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Service après vente */}
+                        <div className="md:pl-8">
+                            <h3 className="mb-4 text-lg font-bold text-white" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                                Service après vente :
+                            </h3>
+                            <ul className="space-y-2 text-sm text-white/80">
+                                <li className="flex items-center gap-2">
+                                    <Phone className="size-4 shrink-0" />
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <Mail className="size-4 shrink-0" />
+                                </li>
+                                <li className="flex items-center gap-2">
+                                    <MapPin className="size-4 shrink-0" />
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </section>
         </PublicLayout>
@@ -97,25 +164,27 @@ function ContactForm({ productId }: { productId: number | null }) {
         <form onSubmit={handleSubmit} className="rounded-xl bg-black p-6 shadow-sm sm:p-8">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 {/* Name */}
-                <div className="sm:col-span-2">
+                <div className="sm:col-span-1">
                     <input
                         id="name"
                         type="text"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
-                        className="w-[half] rounded-full border border-white-400 bg-[#1a1a1a] px-4 py-2.5 text-sm text-white transition-colors focus:outline-none"
+                        className="w-full font-poppins font-light rounded-full border border-white-400 bg-[#1a1a1a] px-8 py-2.5 text-sm text-white transition-colors focus:outline-none"
                         placeholder='Nom & prénom *'
                         required
                     />
                     {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+                </div>
 
-                    {/* Phone */}
+                {/* Phone */}
+                <div className="sm:col-span-1">
                     <input
                         id="phone"
                         type="tel"
                         value={data.phone}
                         onChange={(e) => setData('phone', e.target.value)}
-                        className="w-[half] rounded-full border border-white-400 bg-[#1a1a1a] px-4 py-2.5 text-sm text-white transition-colors focus:outline-none"
+                        className="w-full font-poppins font-light rounded-full border border-white-400 bg-[#1a1a1a] px-8 py-2.5 text-sm text-white transition-colors focus:outline-none"
                         placeholder='Téléphone *'
                     />
                     {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
@@ -123,15 +192,13 @@ function ContactForm({ productId }: { productId: number | null }) {
 
                 {/* Email */}
                 <div>
-                    <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-gray-300">
-                        E-mail <span className="text-red-500">*</span>
-                    </label>
                     <input
                         id="email"
                         type="email"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
-                        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full font-poppins font-light rounded-full border border-white-400 bg-[#1a1a1a] px-8 py-2.5 text-sm text-white transition-colors focus:outline-none"
+                        placeholder="E-mail *"
                         required
                     />
                     {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
@@ -139,106 +206,86 @@ function ContactForm({ productId }: { productId: number | null }) {
 
                 {/* City */}
                 <div>
-                    <label htmlFor="city" className="mb-1.5 block text-sm font-medium text-gray-300">
-                        Ville
-                    </label>
                     <input
                         id="city"
                         type="text"
                         value={data.city}
                         onChange={(e) => setData('city', e.target.value)}
-                        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full font-poppins font-light rounded-full border border-white-400 bg-[#1a1a1a] px-8 py-2.5 text-sm text-white transition-colors focus:outline-none"
+                        placeholder="Ville"
                     />
                     {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
                 </div>
 
                 {/* Activity Type */}
                 <div>
-                    <label htmlFor="activity_type" className="mb-1.5 block text-sm font-medium text-gray-300">
-                        Type d'activité
-                    </label>
-                    <select
-                        id="activity_type"
-                        value={data.activity_type}
-                        onChange={(e) => setData('activity_type', e.target.value)}
-                        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                        <option value="">Sélectionnez...</option>
-                        {ACTIVITY_TYPES.map((type) => (
-                            <option key={type} value={type}>{type}</option>
-                        ))}
-                    </select>
+                    <Select value={data.activity_type} onValueChange={(val) => setData('activity_type', val)}>
+                        <SelectTrigger className="h-auto min-h-[44px] font-poppins font-light w-full rounded-full border-white-400 bg-[#1a1a1a] px-8 py-2.5 text-sm text-white shadow-none focus:outline-none focus:ring-0">
+                            <SelectValue placeholder="Type d'activité" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-white-400 bg-[#1a1a1a] text-white">
+                            {ACTIVITY_TYPES.map((type) => (
+                                <SelectItem key={type} value={type} className="focus:bg-white focus:text-black">{type}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     {errors.activity_type && <p className="mt-1 text-sm text-red-600">{errors.activity_type}</p>}
                 </div>
 
                 {/* Project Nature */}
                 <div>
-                    <label htmlFor="project_nature" className="mb-1.5 block text-sm font-medium text-gray-300">
-                        Nature du projet
-                    </label>
-                    <select
-                        id="project_nature"
-                        value={data.project_nature}
-                        onChange={(e) => setData('project_nature', e.target.value)}
-                        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                        <option value="">Sélectionnez...</option>
-                        {PROJECT_NATURES.map((nature) => (
-                            <option key={nature} value={nature}>{nature}</option>
-                        ))}
-                    </select>
+                    <Select value={data.project_nature} onValueChange={(val) => setData('project_nature', val)}>
+                        <SelectTrigger className="h-auto min-h-[44px] font-poppins font-light w-full rounded-full border-white-400 bg-[#1a1a1a] px-8 py-2.5 text-sm text-white shadow-none focus:outline-none focus:ring-0">
+                            <SelectValue placeholder="Nature du projet" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-white-400 bg-[#1a1a1a] text-white">
+                            {PROJECT_NATURES.map((nature) => (
+                                <SelectItem key={nature} value={nature} className="focus:bg-white focus:text-black">{nature}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     {errors.project_nature && <p className="mt-1 text-sm text-red-600">{errors.project_nature}</p>}
                 </div>
 
                 {/* Equipment Timeline */}
                 <div>
-                    <label htmlFor="equipment_timeline" className="mb-1.5 block text-sm font-medium text-gray-300">
-                        Délai d'équipement
-                    </label>
-                    <select
-                        id="equipment_timeline"
-                        value={data.equipment_timeline}
-                        onChange={(e) => setData('equipment_timeline', e.target.value)}
-                        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                        <option value="">Sélectionnez...</option>
-                        {EQUIPMENT_TIMELINES.map((timeline) => (
-                            <option key={timeline} value={timeline}>{timeline}</option>
-                        ))}
-                    </select>
+                    <Select value={data.equipment_timeline} onValueChange={(val) => setData('equipment_timeline', val)}>
+                        <SelectTrigger className="h-auto min-h-[44px] font-poppins font-light w-full rounded-full border-white-400 bg-[#1a1a1a] px-8 py-2.5 text-sm text-white shadow-none focus:outline-none focus:ring-0">
+                            <SelectValue placeholder="Délai d'équipement" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-white-400 bg-[#1a1a1a] text-white">
+                            {EQUIPMENT_TIMELINES.map((timeline) => (
+                                <SelectItem key={timeline} value={timeline} className="focus:bg-white focus:text-black">{timeline}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     {errors.equipment_timeline && <p className="mt-1 text-sm text-red-600">{errors.equipment_timeline}</p>}
                 </div>
 
                 {/* Request Reason */}
                 <div>
-                    <label htmlFor="request_reason" className="mb-1.5 block text-sm font-medium text-gray-300">
-                        Motif de la demande
-                    </label>
-                    <select
-                        id="request_reason"
-                        value={data.request_reason}
-                        onChange={(e) => setData('request_reason', e.target.value)}
-                        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                        <option value="">Sélectionnez...</option>
-                        {REQUEST_REASONS.map((reason) => (
-                            <option key={reason} value={reason}>{reason}</option>
-                        ))}
-                    </select>
+                    <Select value={data.request_reason} onValueChange={(val) => setData('request_reason', val)}>
+                        <SelectTrigger className="h-auto min-h-[44px] font-poppins font-light w-full rounded-full border-white-400 bg-[#1a1a1a] px-8 py-2.5 text-sm text-white shadow-none focus:outline-none focus:ring-0">
+                            <SelectValue placeholder="Motif de la demande" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-white-400 bg-[#1a1a1a] text-white">
+                            {REQUEST_REASONS.map((reason) => (
+                                <SelectItem key={reason} value={reason} className="focus:bg-white focus:text-black">{reason}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     {errors.request_reason && <p className="mt-1 text-sm text-red-600">{errors.request_reason}</p>}
                 </div>
 
                 {/* Message */}
                 <div className="sm:col-span-2">
-                    <label htmlFor="message" className="mb-1.5 block text-sm font-medium text-gray-300">
-                        Message <span className="text-red-500">*</span>
-                    </label>
                     <textarea
                         id="message"
                         rows={5}
                         value={data.message}
                         onChange={(e) => setData('message', e.target.value)}
-                        className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full font-poppins font-light rounded-2xl border border-white-400 bg-[#1a1a1a] px-8 py-4 text-sm text-white transition-colors focus:outline-none"
+                        placeholder="Précisez ici votre message / Dis-nous en plus sur ta demande"
                         required
                     />
                     {errors.message && <p className="mt-1 text-sm text-red-600">{errors.message}</p>}
@@ -249,13 +296,13 @@ function ContactForm({ productId }: { productId: number | null }) {
                 <input type="hidden" name="product_id" value={data.product_id} />
             )}
 
-            <div className="mt-8">
+            <div className="mt-8 flex">
                 <button
                     type="submit"
                     disabled={processing}
-                    className="w-full rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-white/80 disabled:opacity-50"
+                    className="w-full sm:w-[25%] sm:ml-auto font-poppins font-bold glow-btn rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#d5ab70] hover:text-white disabled:opacity-50"
                 >
-                    {processing ? 'Envoi en cours...' : 'Envoyer le message'}
+                    {processing ? 'Envoi en cours...' : 'Envoyer'}
                 </button>
             </div>
         </form>

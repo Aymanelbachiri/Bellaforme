@@ -39,8 +39,7 @@ class BrandController extends Controller
         $divisionIds = $data['division_ids'] ?? [];
         unset($data['division_ids']);
 
-        // Handle logo upload
-        $data['logo'] = $this->imageOptimizer->optimize($request->file('logo'), 'brands');
+        $data['logo'] = $this->imageOptimizer->resolveImage($request, 'logo', 'brands');
 
         $brand = Brand::create($data);
         $brand->divisions()->sync($divisionIds);
@@ -64,10 +63,10 @@ class BrandController extends Controller
         $divisionIds = $data['division_ids'] ?? [];
         unset($data['division_ids']);
 
-        // Handle logo upload if a new one is provided
-        if ($request->hasFile('logo')) {
+        $resolvedLogo = $this->imageOptimizer->resolveImage($request, 'logo', 'brands');
+        if ($resolvedLogo && $resolvedLogo !== $brand->logo) {
             $this->imageOptimizer->delete($brand->logo);
-            $data['logo'] = $this->imageOptimizer->optimize($request->file('logo'), 'brands');
+            $data['logo'] = $resolvedLogo;
         } else {
             unset($data['logo']);
         }

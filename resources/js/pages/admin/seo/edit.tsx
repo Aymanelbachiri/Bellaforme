@@ -30,8 +30,8 @@ export default function SeoEdit({ pages }: { pages: PageSeo[] }) {
     const { flash } = usePage<{ flash: { success?: string } }>().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Dashboard', href: '/dashboard' },
-        { title: 'SEO Settings', href: '/admin/seo' },
+        { title: 'Tableau de bord', href: '/dashboard' },
+        { title: 'Paramètres SEO', href: '/admin/seo' },
     ];
 
     const { data, setData, post, processing, errors } = useForm({
@@ -58,12 +58,9 @@ export default function SeoEdit({ pages }: { pages: PageSeo[] }) {
             type: 'image',
             directory: 'seo',
             onSelect: (file) => {
-                fetch(file.url).then((r) => r.blob()).then((blob) => {
-                    const f = new File([blob], file.name, { type: blob.type });
-                    const updated = data.pages.map((page, i) => i === index ? { ...page, og_image: f } : page);
-                    setData('pages', updated);
-                    setPreviews((p) => ({ ...p, [index]: file.url }));
-                });
+                const updated = data.pages.map((page, i) => i === index ? { ...page, og_image: file.path } : page);
+                setData('pages', updated);
+                setPreviews((p) => ({ ...p, [index]: file.url }));
             },
             onUpload: (file) => {
                 const updated = data.pages.map((page, i) => i === index ? { ...page, og_image: file } : page);
@@ -85,9 +82,9 @@ export default function SeoEdit({ pages }: { pages: PageSeo[] }) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="SEO Settings" />
+            <Head title="Paramètres SEO" />
             <div className="space-y-6 p-4">
-                <h1 className="text-xl font-semibold tracking-tight">SEO Settings</h1>
+                <h1 className="text-xl font-semibold tracking-tight">Paramètres SEO</h1>
 
                 {flash?.success && (
                     <div className="rounded-md bg-green-50 p-3 text-sm text-green-700">{flash.success}</div>
@@ -100,36 +97,36 @@ export default function SeoEdit({ pages }: { pages: PageSeo[] }) {
                             <CardContent className="space-y-4">
                                 <div className="grid gap-4 md:grid-cols-2">
                                     <div className="grid gap-2">
-                                        <Label htmlFor={`meta_title_${page.key}`}>Meta Title</Label>
+                                        <Label htmlFor={`meta_title_${page.key}`}>Titre Meta</Label>
                                         <Input
                                             id={`meta_title_${page.key}`}
                                             value={data.pages[index].meta_title}
                                             onChange={(e) => updatePage(index, 'meta_title', e.target.value)}
-                                            placeholder="Page title for search engines"
+                                            placeholder="Titre de la page pour les moteurs de recherche"
                                             maxLength={255}
                                         />
                                         <InputError message={errors[`pages.${index}.meta_title` as keyof typeof errors]} />
                                     </div>
                                     <div className="grid gap-2">
-                                        <Label>OG Image</Label>
+                                        <Label>Image OG</Label>
                                         {previews[index] && (
                                             <img src={previews[index]} alt={`OG image for ${page.label}`} className="h-24 w-40 rounded object-cover" />
                                         )}
                                         <Button type="button" variant="outline" className="w-fit gap-2" onClick={() => openOgPicker(index)}>
                                             <ImageIcon className="h-4 w-4" />
-                                            {previews[index] ? 'Change Image' : 'Select Image'}
+                                            {previews[index] ? 'Changer l\'image' : 'Sélectionner une image'}
                                         </Button>
                                         <InputError message={errors[`pages.${index}.og_image` as keyof typeof errors]} />
                                     </div>
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor={`meta_description_${page.key}`}>Meta Description</Label>
+                                    <Label htmlFor={`meta_description_${page.key}`}>Description Meta</Label>
                                     <textarea
                                         id={`meta_description_${page.key}`}
                                         className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                         value={data.pages[index].meta_description}
                                         onChange={(e) => updatePage(index, 'meta_description', e.target.value)}
-                                        placeholder="Brief description for search engines (max 500 characters)"
+                                        placeholder="Brève description pour les moteurs de recherche (max 500 caractères)"
                                         maxLength={500}
                                         rows={3}
                                     />
@@ -140,7 +137,7 @@ export default function SeoEdit({ pages }: { pages: PageSeo[] }) {
                     ))}
 
                     <div className="flex justify-end">
-                        <Button type="submit" disabled={processing}>{processing ? 'Saving...' : 'Save SEO Settings'}</Button>
+                        <Button type="submit" disabled={processing}>{processing ? 'Enregistrement...' : 'Enregistrer les paramètres SEO'}</Button>
                     </div>
                 </form>
             </div>

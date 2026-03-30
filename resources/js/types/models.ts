@@ -14,6 +14,11 @@ export interface Division {
     hero_title: string;
     hero_subtitle: string;
     homepage_subtitle: string | null;
+    phone: string | null;
+    facebook_url: string | null;
+    instagram_url: string | null;
+    linkedin_url: string | null;
+    youtube_url: string | null;
     order: number;
     is_active: boolean;
     seo?: SeoMetadata | null;
@@ -25,6 +30,9 @@ export interface Category {
     name: string;
     slug: string;
     image: string;
+    hero_image: string | null;
+    video_cover: string | null;
+    video_url: string | null;
     order: number;
     is_active: boolean;
     division?: Division;
@@ -133,6 +141,20 @@ export interface ContactMessage {
     product_id: number | null;
     created_at: string;
     product?: Product;
+}
+
+export interface SolutionsSection {
+    title: string;
+    description: string;
+    image: string;
+}
+
+export interface SolutionsSettings {
+    id: number;
+    hero_title: string;
+    hero_subtitle: string;
+    hero_image: string;
+    sections: SolutionsSection[];
 }
 
 export interface EmailSettings {
