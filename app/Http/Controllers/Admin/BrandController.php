@@ -25,10 +25,14 @@ class BrandController extends Controller
         if ($search = request('search')) {
             $query->where('name', 'like', "%{$search}%");
         }
+        if ($divisionId = request('division_id')) {
+            $query->whereHas('divisions', fn ($q) => $q->where('divisions.id', $divisionId));
+        }
 
         return Inertia::render('admin/brands/index', [
             'brands' => $query->paginate(15)->withQueryString(),
-            'filters' => ['search' => $search ?? ''],
+            'divisions' => Division::orderBy('name')->get(['id', 'name']),
+            'filters' => ['search' => $search ?? '', 'division_id' => $divisionId ?? ''],
         ]);
     }
 

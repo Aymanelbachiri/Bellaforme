@@ -12,15 +12,26 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Marques', href: '/admin/brands' },
 ];
 
+interface Division { id: number; name: string }
+
 export default function BrandsIndex({
     brands,
+    divisions,
     filters,
 }: {
     brands: PaginatedData<Brand>;
-    filters: { search: string };
+    divisions: Division[];
+    filters: { search: string; division_id: string };
 }) {
     const dialog = useConfirmDialog();
     const [search, setSearch] = useState(filters.search ?? '');
+    const [divisionId, setDivisionId] = useState(filters.division_id ?? '');
+
+    function applyFilters(overrides: Record<string, string> = {}) {
+        const params: Record<string, string> = { search, division_id: divisionId, ...overrides };
+        const filtered = Object.fromEntries(Object.entries(params).filter(([, v]) => v));
+        router.get('/admin/brands', filtered, { preserveState: true });
+    }
 
     function handleDelete(brand: Brand) {
         dialog.confirm(
@@ -40,7 +51,15 @@ export default function BrandsIndex({
                         Marques
                     </h1>
                     <div className="flex items-center gap-3">
-                        <form onSubmit={(e) => { e.preventDefault(); router.get('/admin/brands', search ? { search } : {}, { preserveState: true }); }}>
+                        <select
+                            value={divisionId}
+                            onChange={(e) => { setDivisionId(e.target.value); applyFilters({ division_id: e.target.value }); }}
+                            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                            <option value="">Toutes les divisions</option>
+                            {divisions.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                        </select>
+                        <form onSubmit={(e) => { e.preventDefault(); applyFilters(); }}>
                             <Input
                                 placeholder="Rechercher..."
                                 value={search}
