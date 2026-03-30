@@ -28,10 +28,22 @@ class ProductController extends Controller
         if ($search = request('search')) {
             $query->where('name', 'like', "%{$search}%");
         }
+        if ($divisionId = request('division_id')) {
+            $query->where('division_id', $divisionId);
+        }
+        if ($categoryId = request('category_id')) {
+            $query->where('category_id', $categoryId);
+        }
 
         return Inertia::render('admin/products/index', [
             'products' => $query->paginate(15)->withQueryString(),
-            'filters' => ['search' => $search ?? ''],
+            'divisions' => Division::orderBy('name')->get(['id', 'name']),
+            'categories' => Category::orderBy('name')->get(['id', 'name', 'division_id']),
+            'filters' => [
+                'search' => $search ?? '',
+                'division_id' => $divisionId ?? '',
+                'category_id' => $categoryId ?? '',
+            ],
         ]);
     }
 

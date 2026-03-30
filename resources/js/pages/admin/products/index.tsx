@@ -1,11 +1,14 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog, useConfirmDialog } from '@/components/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, PaginatedData, Product } from '@/types';
+
+interface Division { id: number; name: string }
+interface Category { id: number; name: string; division_id: number }
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Tableau de bord', href: '/dashboard' },
@@ -14,13 +17,30 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function ProductsIndex({
     products,
+    divisions,
+    categories,
     filters,
 }: {
     products: PaginatedData<Product>;
-    filters: { search: string };
+    divisions: Division[];
+    categories: Category[];
+    filters: { search: string; division_id: string; category_id: string };
 }) {
     const dialog = useConfirmDialog();
     const [search, setSearch] = useState(filters.search ?? '');
+    const [divisionId, setDivisionId] = useState(filters.division_id ?? '');
+    const [categoryId, setCategoryId] = useState(filters.category_id ?? '');
+
+    const filteredCategories = useMemo(
+        () => divisionId ? categories.filter((c) => c.division_id === Number(divisionId)) : categories,
+        [categories, divisionId],
+    );
+
+    function applyFilters(overrides: Record<string, string> = {}) {
+        const params: Record<string, string> = { search, division_id: divisionId, category_id: categoryId, ...overrides };
+        const filtered = Object.fromEntries(Object.entries(params).filter(([, v]) => v));
+        router.get('/admin/products', filtered, { preserveState: true });
+    }
 
     function handleDelete(product: Product) {
         dialog.confirm(
@@ -35,12 +55,28 @@ export default function ProductsIndex({
             <Head title="Produits" />
 
             <div className="space-y-6 p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                     <h1 className="text-xl font-semibold tracking-tight">
                         Produits
                     </h1>
-                    <div className="flex items-center gap-3">
-                        <form onSubmit={(e) => { e.preventDefault(); router.get('/admin/products', search ? { search } : {}, { preserveState: true }); }}>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <select
+                            value={divisionId}
+                            onChange={(e) => { setDivisionId(e.target.value); setCategoryId(''); applyFilters({ division_id: e.target.value, category_id: '' }); }}
+                            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                            <option value="">Toutes les divisions</option>
+                            {divisions.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                        </select>
+                        <select
+                            value={categoryId}
+                            onChange={(e) => { setCategoryId(e.target.value); applyFilters({ category_id: e.target.value }); }}
+                            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                            <option value="">Toutes les catégories</option>
+                            {filteredCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                        <form onSubmit={(e) => { e.preventDefault(); applyFilters(); }}>
                             <Input
                                 placeholder="Rechercher..."
                                 value={search}
