@@ -1,0 +1,5 @@
+RewriteEngine On
+RewriteBase /storage/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /storage/index.php [L,QSA]
