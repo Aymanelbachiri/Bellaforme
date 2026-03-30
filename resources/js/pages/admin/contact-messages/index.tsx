@@ -1,12 +1,14 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog, useConfirmDialog } from '@/components/confirm-dialog';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, ContactMessage, PaginatedData } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Contact Messages', href: '/admin/contact-messages' },
+    { title: 'Tableau de bord', href: '/dashboard' },
+    { title: 'Messages de contact', href: '/admin/contact-messages' },
 ];
 
 export default function ContactMessagesIndex({
@@ -14,35 +16,94 @@ export default function ContactMessagesIndex({
 }: {
     contactMessages: PaginatedData<ContactMessage>;
 }) {
+    const dialog = useConfirmDialog();
+    const [selected, setSelected] = useState<number[]>([]);
+
+    const allIds = contactMessages.data.map((m) => m.id);
+    const allSelected = allIds.length > 0 && allIds.every((id) => selected.includes(id));
+
+    function toggleAll() {
+        setSelected(allSelected ? [] : allIds);
+    }
+
+    function toggleOne(id: number) {
+        setSelected((prev) =>
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+        );
+    }
+
+    function handleDelete(msg: ContactMessage) {
+        dialog.confirm(
+            `Supprimer le message de "${msg.name}" ?`,
+            'Ce message sera définitivement supprimé. Cette action est irréversible.',
+            () => router.delete(`/admin/contact-messages/${msg.id}`, {
+                onSuccess: () => setSelected((prev) => prev.filter((i) => i !== msg.id)),
+            }),
+        );
+    }
+
+    function handleBulkDelete() {
+        dialog.confirm(
+            `Supprimer ${selected.length} message${selected.length > 1 ? 's' : ''} ?`,
+            'Ces messages seront définitivement supprimés. Cette action est irréversible.',
+            () => router.post('/admin/contact-messages/bulk-destroy', { ids: selected }, {
+                onSuccess: () => setSelected([]),
+            }),
+        );
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Contact Messages" />
+            <Head title="Messages de contact" />
 
             <div className="space-y-6 p-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-xl font-semibold tracking-tight">
-                        Contact Messages
+                        Messages de contact
                     </h1>
-                    <Badge variant="secondary">
-                        {contactMessages.total} message{contactMessages.total !== 1 ? 's' : ''}
-                    </Badge>
+                    <div className="flex items-center gap-3">
+                        {selected.length > 0 && (
+                            <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+                                Supprimer ({selected.length})
+                            </Button>
+                        )}
+                        <Badge variant="secondary">
+                            {contactMessages.total} message{contactMessages.total !== 1 ? 's' : ''}
+                        </Badge>
+                    </div>
                 </div>
 
                 <div className="overflow-hidden rounded-lg border">
                     <table className="w-full text-sm">
                         <thead className="border-b bg-muted/50">
                             <tr>
-                                <th className="px-4 py-3 text-left font-medium">Name</th>
-                                <th className="px-4 py-3 text-left font-medium">Email</th>
+                                <th className="w-10 px-4 py-3">
+                                    <input
+                                        type="checkbox"
+                                        checked={allSelected}
+                                        onChange={toggleAll}
+                                        className="size-4 rounded border-gray-300"
+                                    />
+                                </th>
+                                <th className="px-4 py-3 text-left font-medium">Nom</th>
+                                <th className="px-4 py-3 text-left font-medium">E-mail</th>
                                 <th className="px-4 py-3 text-left font-medium">Message</th>
-                                <th className="px-4 py-3 text-left font-medium">Product</th>
+                                <th className="px-4 py-3 text-left font-medium">Produit</th>
                                 <th className="px-4 py-3 text-left font-medium">Date</th>
                                 <th className="px-4 py-3 text-right font-medium">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
                             {contactMessages.data.map((msg) => (
-                                <tr key={msg.id}>
+                                <tr key={msg.id} className={selected.includes(msg.id) ? 'bg-muted/30' : ''}>
+                                    <td className="px-4 py-3">
+                                        <input
+                                            type="checkbox"
+                                            checked={selected.includes(msg.id)}
+                                            onChange={() => toggleOne(msg.id)}
+                                            className="size-4 rounded border-gray-300"
+                                        />
+                                    </td>
                                     <td className="px-4 py-3 font-medium">{msg.name}</td>
                                     <td className="px-4 py-3 text-muted-foreground">{msg.email}</td>
                                     <td className="max-w-xs truncate px-4 py-3 text-muted-foreground">
@@ -63,21 +124,23 @@ export default function ContactMessagesIndex({
                                         })}
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <Button variant="outline" size="sm" asChild>
-                                            <Link href={`/admin/contact-messages/${msg.id}`}>
-                                                View
-                                            </Link>
-                                        </Button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Button variant="outline" size="sm" asChild>
+                                                <Link href={`/admin/contact-messages/${msg.id}`}>
+                                                    Voir
+                                                </Link>
+                                            </Button>
+                                            <Button variant="destructive" size="sm" onClick={() => handleDelete(msg)}>
+                                                Supprimer
+                                            </Button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
                             {contactMessages.data.length === 0 && (
                                 <tr>
-                                    <td
-                                        colSpan={6}
-                                        className="px-4 py-8 text-center text-muted-foreground"
-                                    >
-                                        No contact messages found.
+                                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                                        Aucun message de contact trouvé.
                                     </td>
                                 </tr>
                             )}
@@ -96,20 +159,22 @@ export default function ContactMessagesIndex({
                                 asChild={!!link.url}
                             >
                                 {link.url ? (
-                                    <Link
-                                        href={link.url}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                    />
+                                    <Link href={link.url} dangerouslySetInnerHTML={{ __html: link.label }} />
                                 ) : (
-                                    <span
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                    />
+                                    <span dangerouslySetInnerHTML={{ __html: link.label }} />
                                 )}
                             </Button>
                         ))}
                     </div>
                 )}
             </div>
+            <ConfirmDialog
+                open={dialog.open}
+                onOpenChange={dialog.setOpen}
+                title={dialog.title}
+                description={dialog.description}
+                onConfirm={dialog.handleConfirm}
+            />
         </AppLayout>
     );
 }
