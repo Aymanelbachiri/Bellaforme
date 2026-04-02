@@ -15,10 +15,20 @@ interface Props {
     contactUrl?: string;
 }
 
+const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+
 const FlipPage = React.forwardRef<HTMLDivElement, { pageNumber: number; width: number; height: number }>(
     ({ pageNumber, width, height }, ref) => (
-        <div ref={ref} style={{ width, height }} className="bg-white">
-            <Page pageNumber={pageNumber} width={width} renderTextLayer={false} renderAnnotationLayer={false} />
+        <div ref={ref} style={{ width, height, overflow: 'hidden' }} className="bg-white">
+            <div style={{ transform: `scale(${1 / dpr})`, transformOrigin: 'top left', width: width * dpr, height: height * dpr }}>
+                <Page
+                    pageNumber={pageNumber}
+                    width={width * dpr}
+                    renderTextLayer={true}
+                    renderAnnotationLayer={true}
+                    canvasBackground="white"
+                />
+            </div>
         </div>
     ),
 );
