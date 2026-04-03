@@ -105,8 +105,10 @@ class ImageOptimizer
             $pathInfo = pathinfo($absolutePath);
             $avifPath = $pathInfo['dirname'] . DIRECTORY_SEPARATOR . $pathInfo['filename'] . '.avif';
 
-            imageavif($image, $avifPath, 75);
+            @imageavif($image, $avifPath, 75);
             imagedestroy($image);
+        } catch (\Throwable) {
+            // AVIF generation is optional — skip silently if it fails
         } finally {
             @ini_set('memory_limit', $previousLimit);
         }
