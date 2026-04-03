@@ -31,6 +31,15 @@ class HomepageController extends Controller
 
     public function update(Request $request, ImageOptimizer $imageOptimizer): RedirectResponse
     {
+        try {
+            return $this->performUpdate($request, $imageOptimizer);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['hero_image' => 'Erreur serveur: '.$e->getMessage()]);
+        }
+    }
+
+    private function performUpdate(Request $request, ImageOptimizer $imageOptimizer): RedirectResponse
+    {
         $validated = $request->validate([
             'hero_image' => ['nullable', new ImageOrPath],
             'hero_title' => ['nullable', 'string', 'max:255'],
