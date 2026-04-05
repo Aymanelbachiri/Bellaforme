@@ -26,8 +26,11 @@ use App\Models\Category;
 use App\Models\ContactMessage;
 use App\Models\Division;
 use App\Models\Product;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+Route::get('/sitemap.xml', SitemapController::class);
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
