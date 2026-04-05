@@ -42,6 +42,16 @@ Route::get('/nos-references', [ReferencesController::class, 'index'])->name('nos
 Route::get('/nos-catalogues', [CataloguesController::class, 'index'])->name('nos-catalogues');
 Route::get('/nos-solutions', [SolutionsController::class, 'index'])->name('nos-solutions');
 
+Route::get('/conditions-de-vente', function () {
+    return Inertia::render('conditions-de-vente', [
+        'seo' => [
+            'meta_title' => 'Conditions de vente - Bella Forme',
+            'meta_description' => 'Consultez les conditions générales de vente de Bella Forme Group.',
+            'og_image' => null,
+        ],
+    ]);
+})->name('conditions-de-vente');
+
 Route::get('/qui-sommes-nous', function () {
     $seo = \App\Models\SeoMetadata::where('seoable_type', 'page')->where('seoable_id', 3)->first();
 

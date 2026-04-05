@@ -26,6 +26,7 @@ class SitemapController extends Controller
             ['loc' => '/nos-references', 'priority' => '0.6', 'changefreq' => 'monthly'],
             ['loc' => '/nos-catalogues', 'priority' => '0.7', 'changefreq' => 'weekly'],
             ['loc' => '/nos-solutions', 'priority' => '0.6', 'changefreq' => 'monthly'],
+            ['loc' => '/conditions-de-vente', 'priority' => '0.4', 'changefreq' => 'yearly'],
         ];
 
         foreach ($staticPages as $page) {

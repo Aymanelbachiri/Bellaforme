@@ -226,7 +226,7 @@ function Footer({ appName }: FooterProps) {
                             Support d'aide & contact :
                         </h3>
                         <ul className="space-y-2.5 text-sm break-words">
-                            <li><Link href="/contact" className="transition-colors hover:text-[#d5ab70]">Conditions de vente</Link></li>
+                            <li><Link href="/conditions-de-vente" className="transition-colors hover:text-[#d5ab70]">Conditions de vente</Link></li>
                             <li className="flex items-center gap-2">
                                 <Phone className="size-3.5 shrink-0 text-white" />
                                 <span>+212 522 258 481</span>
