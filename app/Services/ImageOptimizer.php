@@ -97,16 +97,21 @@ class ImageOptimizer
                 return;
             }
 
-            if ($ext === 'png') {
-                imagealphablending($image, false);
-                imagesavealpha($image, true);
-            }
+            // Flatten transparency onto white background for AVIF compatibility
+            $width = imagesx($image);
+            $height = imagesy($image);
+            $flat = imagecreatetruecolor($width, $height);
+            $black = imagecolorallocate($flat, 0, 0, 0);
+            imagefill($flat, 0, 0, $black);
+            imagealphablending($flat, true);
+            imagecopy($flat, $image, 0, 0, 0, 0, $width, $height);
+            imagedestroy($image);
 
             $pathInfo = pathinfo($absolutePath);
             $avifPath = $pathInfo['dirname'] . DIRECTORY_SEPARATOR . $pathInfo['filename'] . '.avif';
 
-            @imageavif($image, $avifPath, 75);
-            imagedestroy($image);
+            @imageavif($flat, $avifPath, 75);
+            imagedestroy($flat);
         } catch (\Throwable) {
             // AVIF generation is optional — skip silently if it fails
         } finally {

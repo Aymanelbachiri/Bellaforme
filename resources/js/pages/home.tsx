@@ -134,29 +134,6 @@ function HeroSection({ settings }: { settings: HomepageSettings | null }) {
                     </div>
                 ))}
             </Slider>
-            {/* Decorative shape + play button at bottom of hero slider */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden hidden sm:block">
-                <div className="relative">
-                    <img
-                        src="/images/shape-2.png"
-                        alt=""
-                        className="pointer-events-none"
-                        style={{ minWidth: '900px' }}
-                        aria-hidden="true"
-                    />
-                    
-                    <button
-                        type="button"
-                        className="hero-play-btn absolute left-1/2 bottom-5 translate-y-1/2 md:bottom-[-0.3rem] md:-translate-y-1/2 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-black shadow-lg transition-transform hover:scale-110 "
-                        aria-label="Play video"
-                        style={{ boxShadow: "0 0 10px rgba(255, 255, 255, 0.8)" }}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5 ml-0.5">
-                            <path d="M8 5.14v14l11-7-11-7z" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
         </section>
     );
 }
