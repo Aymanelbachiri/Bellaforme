@@ -70,7 +70,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 )}
 
                 {/* Bottom overlay — always visible */}
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent px-5 pb-5 pt-16">
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent px-2 pb-5 pt-16">
                     <h3
                         className="mb-4 text-lg font-bold text-white"
                         style={{ fontFamily: "'Manrope', sans-serif" }}
