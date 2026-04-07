@@ -72,7 +72,7 @@ export default function CategoryShow({ division, category, brands, seo }: Catego
                             Aucun produit trouvé.
                         </div>
                     ) : (
-                        <div className="mx-auto grid w-[75%] grid-cols-1 gap-6 sm:w-full sm:grid-cols-2 sm:gap-8 lg:grid-cols-3">
+                        <div className="mx-auto grid w-[75%] grid-cols-1 gap-6 sm:w-full sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
                             {products.map((product, index) => (
                                 <div
                                     key={product.id}

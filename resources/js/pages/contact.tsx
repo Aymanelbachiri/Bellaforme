@@ -120,14 +120,17 @@ export default function Contact({ product_id, seo }: ContactProps) {
                                 Service après vente :
                             </h3>
                             <ul className="space-y-2 text-sm text-white/80">
-                                <li className="flex items-center gap-2">
-                                    <Phone className="size-4 shrink-0" />
+                                <li className="flex items-start gap-2">
+                                    <Phone className="mt-0.5 size-4 shrink-0" />
+                                    <a href="tel:+212522989521" className="hover:text-[#d5ab70] transition-colors">+212 5 22 98 95 21 / 22</a>
                                 </li>
-                                <li className="flex items-center gap-2">
-                                    <Mail className="size-4 shrink-0" />
+                                <li className="flex items-start gap-2">
+                                    <Mail className="mt-0.5 size-4 shrink-0" />
+                                    <a href="mailto:Savclient@bellaforme.ma" className="hover:text-[#d5ab70] transition-colors">Savclient@bellaforme.ma</a>
                                 </li>
-                                <li className="flex items-center gap-2">
-                                    <MapPin className="size-4 shrink-0" />
+                                <li className="flex items-start gap-2">
+                                    <MapPin className="mt-0.5 size-4 shrink-0" />
+                                    <a href="https://maps.google.com/?q=Angle+rue+Ibnou+Katir+et+Ibnou+Habous+Maarif+Casablanca+20100" target="_blank" rel="noopener noreferrer" className="hover:text-[#d5ab70] transition-colors">Angle rue Ibnou Katir et Ibnou Habous Ma&acirc;rif, Casablanca 20100</a>
                                 </li>
                             </ul>
                         </div>
