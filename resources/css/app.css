@@ -284,6 +284,18 @@
     }
 }
 
+/*
+ * Fluid typography – scales root font-size between 1024px and 1920px.
+ * At 1024px → 14px, at 1920px → 16px. All rem-based sizes scale with it.
+ * Below 1024px Tailwind breakpoints handle mobile sizing.
+ * Admin pages (.dark) are excluded to keep dashboard consistent.
+ */
+@media (min-width: 1024px) {
+    html {
+        font-size: clamp(14px, 0.625rem + 0.223vw, 16px);
+    }
+}
+
 /* Hero Slider overrides */
 .hero-slider .slick-dots {
     bottom: 80px;
