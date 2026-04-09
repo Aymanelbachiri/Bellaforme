@@ -3,6 +3,7 @@ import { FileIcon, ImageIcon } from 'lucide-react';
 import { type FormEvent, useMemo, useState } from 'react';
 import InputError from '@/components/input-error';
 import { MediaPicker, useMediaPicker } from '@/components/media-picker';
+import TiptapEditor from '@/components/tiptap-editor';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -237,17 +238,6 @@ export default function ProductsCreate({
                                     <InputError message={errors.order} />
                                 </div>
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="short_description">Description courte</Label>
-                                <textarea
-                                    id="short_description"
-                                    className={textareaClass}
-                                    value={data.short_description}
-                                    onChange={(e) => setData('short_description', e.target.value)}
-                                />
-                                <InputError message={errors.short_description} />
-                            </div>
-
                             <div className="grid gap-4 md:grid-cols-2">
                                 {/* Featured Image - MediaPicker */}
                                 <div className="grid gap-2">
@@ -296,7 +286,7 @@ export default function ProductsCreate({
                                 <CardContent className="space-y-4">
                                     <div className="grid gap-2">
                                         <Label htmlFor="description">Description *</Label>
-                                        <textarea id="description" className={textareaClass} style={{ minHeight: '120px' }} value={data.description} onChange={(e) => setData('description', e.target.value)} required />
+                                        <TiptapEditor content={data.description} onChange={(html) => setData('description', html)} placeholder="Description du produit..." />
                                         <InputError message={errors.description} />
                                     </div>
                                     <div className="grid gap-2">

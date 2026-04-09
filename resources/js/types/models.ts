@@ -147,6 +147,7 @@ export interface SolutionsSection {
     title: string;
     description: string;
     image: string;
+    brochure: string;
 }
 
 export interface SolutionsSettings {

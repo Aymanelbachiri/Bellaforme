@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SeoMetadata;
 use App\Models\SolutionsSetting;
 use App\Rules\ImageOrPath;
 use App\Services\ImageOptimizer;
@@ -23,8 +24,14 @@ class SolutionsController extends Controller
             'sections' => [],
         ]);
 
+        $seo = SeoMetadata::where('seoable_type', 'page')->where('seoable_id', 13)->first();
+
         return Inertia::render('admin/solutions/edit', [
             'settings' => $settings,
+            'seo' => [
+                'meta_title' => $seo->meta_title ?? '',
+                'meta_description' => $seo->meta_description ?? '',
+            ],
         ]);
     }
 
@@ -39,6 +46,9 @@ class SolutionsController extends Controller
             'sections.*.description' => ['nullable', 'string', 'max:5000'],
             'sections.*.image' => ['nullable', 'string', 'max:500'],
             'section_images.*' => ['nullable', new ImageOrPath],
+            'section_brochures.*' => ['nullable', new \App\Rules\PdfFileOrPath],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:500'],
         ]);
 
         $settings = SolutionsSetting::firstOrCreate([], [
@@ -66,9 +76,12 @@ class SolutionsController extends Controller
         $sections = $validated['sections'] ?? [];
         $sectionImages = $request->file('section_images', []);
         $sectionImagePaths = $request->input('section_images', []);
+        $sectionBrochures = $request->file('section_brochures', []);
+        $sectionBrochurePaths = $request->input('section_brochures', []);
         $existingSections = $settings->sections ?? [];
 
         foreach ($sections as $index => &$section) {
+            // Handle image
             if (isset($sectionImages[$index])) {
                 $section['image'] = $imageOptimizer->optimize($sectionImages[$index], 'solutions/sections');
             } elseif (isset($sectionImagePaths[$index]) && is_string($sectionImagePaths[$index]) && Storage::disk('public')->exists($sectionImagePaths[$index])) {
@@ -76,12 +89,30 @@ class SolutionsController extends Controller
             } elseif (empty($section['image']) && isset($existingSections[$index]['image'])) {
                 $section['image'] = $existingSections[$index]['image'];
             }
+
+            // Handle brochure
+            if (isset($sectionBrochures[$index])) {
+                $section['brochure'] = $sectionBrochures[$index]->store('solutions/brochures', 'public');
+            } elseif (isset($sectionBrochurePaths[$index]) && is_string($sectionBrochurePaths[$index]) && Storage::disk('public')->exists($sectionBrochurePaths[$index])) {
+                $section['brochure'] = $sectionBrochurePaths[$index];
+            } elseif (!isset($section['brochure']) && isset($existingSections[$index]['brochure'])) {
+                $section['brochure'] = $existingSections[$index]['brochure'];
+            }
         }
         unset($section);
 
         $data['sections'] = $sections;
 
         $settings->update($data);
+
+        // Save SEO metadata
+        $seo = SeoMetadata::firstOrNew([
+            'seoable_type' => 'page',
+            'seoable_id' => 13,
+        ]);
+        $seo->meta_title = $validated['meta_title'] ?? null;
+        $seo->meta_description = $validated['meta_description'] ?? null;
+        $seo->save();
 
         return back()->with('success', 'Les paramètres des solutions ont été mis à jour.');
     }

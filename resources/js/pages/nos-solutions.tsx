@@ -1,9 +1,11 @@
 import { Head } from '@inertiajs/react';
-import { Link } from '@inertiajs/react';
-import OptimizedImage from '@/components/optimized-image';
+import { Download } from 'lucide-react';
+import { useState } from 'react';
+import OptimizedImage, { getAvifUrl } from '@/components/optimized-image';
+import PdfViewer from '@/components/pdf-viewer';
 import SeoHead from '@/components/seo-head';
 import PublicLayout from '@/layouts/public-layout';
-import type { SeoData, SolutionsSettings } from '@/types/models';
+import type { SeoData, SolutionsSection, SolutionsSettings } from '@/types/models';
 
 interface NosSolutionsProps {
     settings: SolutionsSettings | null;
@@ -12,25 +14,33 @@ interface NosSolutionsProps {
 
 export default function NosSolutions({ settings, seo }: NosSolutionsProps) {
     const sections = settings?.sections ?? [];
+    const [pdfOpen, setPdfOpen] = useState<{ url: string; title: string } | null>(null);
+
+    const heroImageUrl = settings?.hero_image ? `/storage/${settings.hero_image}` : null;
+    const heroAvifUrl = heroImageUrl ? getAvifUrl(heroImageUrl) : null;
 
     return (
         <PublicLayout>
             <SeoHead {...seo} />
-            <Head title="Nos Solutions à vos Projets" />
+            {heroAvifUrl && (
+                <Head>
+                    <link rel="preload" href={heroAvifUrl} as="image" type="image/avif" />
+                </Head>
+            )}
 
             {/* Hero */}
             <section className="relative flex min-h-[50vh] items-center justify-center overflow-hidden bg-black">
-                {settings?.hero_image ? (
+                {heroImageUrl ? (
                     <div className="absolute inset-0">
                         <OptimizedImage
-                            src={`/storage/${settings.hero_image}`}
+                            src={heroImageUrl}
                             alt="Nos Solutions"
                             loading="eager"
                             fetchPriority="high"
                             className="h-full w-full object-cover opacity-70"
                             sizes="100vw"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/30 to-black" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
                     </div>
                 ) : (
                     <div
@@ -38,92 +48,110 @@ export default function NosSolutions({ settings, seo }: NosSolutionsProps) {
                         style={{ backgroundImage: "url('/images/Black-shape-bg.png')", backgroundSize: 'cover', backgroundPosition: 'center' }}
                     />
                 )}
-                <div className="relative z-10 mx-auto max-w-4xl px-4 text-center text-white entrance-fade-up">
+                <div className="relative z-10 mx-auto max-w-5xl px-4 text-center text-white entrance-fade-up">
                     <h1
-                        className="mb-4 text-3xl font-bold leading-tight sm:text-4xl md:text-6xl glow-text"
-                        style={{ fontFamily: "'Manrope', sans-serif" }}
+                        className="mb-4 text-3xl font-bold leading-tight sm:text-4xl md:text-7xl glow-text"
+                        style={{ fontFamily: "'Manrope', sans-serif", fontWeight: 'bold' }}
                     >
                         {settings?.hero_title || 'Nos Solutions à vos Projets'}
                     </h1>
-                    {(settings?.hero_subtitle) && (
-                        <p className="mx-auto max-w-2xl text-md leading-relaxed text-white font-myriad sm:text-lg">
+                    {settings?.hero_subtitle && (
+                        <p className="mx-auto max-w-2xl text-lg text-gray-200 md:text-xl">
                             {settings.hero_subtitle}
                         </p>
                     )}
                 </div>
             </section>
 
-            {/* Sections */}
-            {sections.length > 0 ? (
-                <section className="bg-black">
-                    {sections.map((section, index) => (
-                        <div
-                            key={index}
-                            className={`flex flex-col ${index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} min-h-[50vh]`}
-                        >
-                            {/* Image */}
-                            {section.image && (
-                                <div className="relative w-full lg:w-1/2">
-                                    <OptimizedImage
-                                        src={`/storage/${section.image}`}
-                                        alt={section.title}
-                                        className="h-full min-h-[300px] w-full object-cover"
-                                        sizes="(max-width: 1024px) 100vw, 50vw"
-                                    />
-                                    <div className={`absolute inset-0 ${index % 2 === 1 ? 'bg-gradient-to-l' : 'bg-gradient-to-r'} from-black/30 to-transparent lg:block hidden`} />
+            {/* Catalogue Grid */}
+            <section className="bg-black py-16">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    {sections.length > 0 ? (
+                        <div className="mx-auto grid w-[75%] grid-cols-1 gap-6 sm:w-full sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
+                            {sections.map((section, index) => (
+                                <div
+                                    key={index}
+                                    className="entrance-fade-up opacity-0"
+                                    style={{ animationDelay: `${index * 60}ms` }}
+                                >
+                                    <SolutionCard section={section} onOpenPdf={(url, title) => setPdfOpen({ url, title })} />
                                 </div>
-                            )}
-
-                            {/* Content */}
-                            <div className={`flex w-full items-center ${section.image ? 'lg:w-1/2' : ''} bg-[#1a1a1a]`}>
-                                <div className="mx-auto max-w-xl px-6 py-12 sm:px-10 lg:py-16">
-                                    <h2
-                                        className="mb-6 text-2xl font-black uppercase text-white md:text-3xl"
-                                        style={{ fontFamily: "'Poppins', sans-serif" }}
-                                    >
-                                        {section.title}
-                                    </h2>
-                                    {section.description && (
-                                        <div
-                                            className="text-md leading-relaxed text-gray-300 font-myriad whitespace-pre-line"
-                                        >
-                                            {section.description}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                            ))}
                         </div>
-                    ))}
-                </section>
-            ) : (
-                <section className="bg-black py-20">
-                    <div className="mx-auto max-w-4xl px-4 text-center">
-                        <p className="text-gray-400 font-myriad">Contenu bientôt disponible.</p>
-                    </div>
-                </section>
-            )}
-
-            {/* CTA */}
-            <section className="bg-[#1a1a1a] py-16">
-                <div className="mx-auto max-w-3xl px-4 text-center">
-                    <h2
-                        className="mb-4 text-2xl font-black uppercase text-white md:text-3xl"
-                        style={{ fontFamily: "'Poppins', sans-serif" }}
-                    >
-                        Vous avez un projet ?
-                    </h2>
-                    <p className="mb-8 text-sm text-gray-300 font-myriad">
-                        Nos équipes sont à votre disposition pour vous accompagner dans la réalisation de votre projet.
-                    </p>
-                    <Link
-                        href="/contact"
-                        className="glow-btn inline-block rounded-full bg-white px-10 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#d5ab70] hover:text-white"
-                        style={{ fontFamily: "'Poppins', sans-serif" }}
-                    >
-                        Nous contacter
-                    </Link>
+                    ) : (
+                        <p className="text-center text-gray-400 font-myriad">Contenu bientôt disponible.</p>
+                    )}
                 </div>
             </section>
+
+            {pdfOpen && (
+                <PdfViewer
+                    open={true}
+                    onClose={() => setPdfOpen(null)}
+                    url={pdfOpen.url}
+                    title={pdfOpen.title}
+                />
+            )}
         </PublicLayout>
+    );
+}
+
+function SolutionCard({ section, onOpenPdf }: { section: SolutionsSection; onOpenPdf: (url: string, title: string) => void }) {
+    const imageUrl = section.image ? `/storage/${section.image}` : '';
+    const brochureUrl = section.brochure ? `/storage/${section.brochure}` : '';
+
+    return (
+        <div className="group relative overflow-hidden border bg-black" style={{ aspectRatio: '210 / 297' }}>
+            {/* Folded corner */}
+            <div className="absolute right-0 top-0 z-10" style={{ width: '60px', height: '60px' }}>
+                <div className="absolute inset-0 bg-white" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%)' }} />
+                <div className="absolute inset-0 bg-black" style={{ clipPath: 'polygon(0 0, 0 100%, 100% 100%)' }} />
+            </div>
+
+            {/* Background image */}
+            {imageUrl ? (
+                <OptimizedImage
+                    src={imageUrl}
+                    alt={section.title}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    sizes="(max-width: 640px) 75vw, (max-width: 1024px) 50vw, 25vw"
+                />
+            ) : (
+                <div className="h-full w-full bg-[#1a1a1a]" />
+            )}
+
+            {/* Bottom overlay */}
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent px-2 pb-5 pt-16">
+                <h3
+                    className="mb-4 text-lg font-bold text-white"
+                    style={{ fontFamily: "'Manrope', sans-serif" }}
+                >
+                    {section.title}
+                </h3>
+                <div className="flex items-center gap-3">
+                    {brochureUrl ? (
+                        <>
+                            <button
+                                type="button"
+                                onClick={() => onOpenPdf(brochureUrl, section.title)}
+                                className="rounded-full glow-btn glow-btn-gold border border-white bg-white px-5 py-2 text-sm font-semibold text-black transition-all hover:text-white hover:bg-[#d5ab70] hover:border-[#d5ab70]"
+                            >
+                                Voir la brochure
+                            </button>
+                            <a
+                                href={brochureUrl}
+                                download={`${section.title}.pdf`}
+                                className="flex items-center gap-1.5 text-sm font-medium text-white transition-colors hover:text-white/70"
+                            >
+                                Télécharger
+                                <Download className="size-4" />
+                            </a>
+                        </>
+                    ) : (
+                        <span className="text-sm text-white/50">Brochure bientôt disponible</span>
+                    )}
+                </div>
+            </div>
+        </div>
     );
 }

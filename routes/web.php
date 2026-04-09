@@ -32,6 +32,11 @@ use Inertia\Inertia;
 
 Route::get('/sitemap.xml', SitemapController::class);
 
+Route::get('/robots.txt', function () {
+    $content = "User-agent: *\nDisallow:\n\nSitemap: " . url('/sitemap.xml');
+    return response($content, 200, ['Content-Type' => 'text/plain']);
+});
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
