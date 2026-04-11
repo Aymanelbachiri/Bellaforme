@@ -109,14 +109,14 @@ function HeroSection({ settings }: { settings: HomepageSettings | null }) {
                     <div key={index}>
                         <div className="relative flex min-h-[50vh] sm:min-h-[70vh] items-center justify-center bg-black">
                             <SlideBackground slide={slide} isFirst={index === 0} />
-                            <div className="relative z-10 mx-auto max-w-5xl px-4 text-center text-white entrance-fade-up">
+                            <div className="relative z-10 mx-auto max-w-7xl px-4 text-center text-white entrance-fade-up">
                                 {slide.title && (
                                     <h2 className="mb-6 text-4xl font-bold leading-tight sm:text-5xl md:text-6xl lg:text-7xl glow-text" style={{ fontFamily: "'Manrope', sans-serif" }}>
                                         {slide.title}
                                     </h2>
                                 )}
                                 {slide.subtitle && (
-                                    <p className="mx-auto max-w-3xl text-lg text-white sm:text-xl md:text-2xl" style={{ fontFamily: "'Myriad Pro', 'Segoe UI', Helvetica, Arial, sans-serif" }}>
+                                    <p className="mx-auto max-w-5xl text-lg text-white sm:text-xl md:text-2xl" style={{ fontFamily: "'Myriad Pro', 'Segoe UI', Helvetica, Arial, sans-serif" }}>
                                         {slide.subtitle}
                                     </p>
                                 )}
@@ -147,14 +147,14 @@ function LegacyHero({ settings }: { settings: HomepageSettings | null }) {
                     <OptimizedImage src={bgImage} alt="Hero background" loading="eager" className="h-full w-full object-cover opacity-60" sizes="100vw" />
                 </div>
             )}
-            <div className="relative z-10 mx-auto max-w-5xl px-4 text-center text-white entrance-fade-up">
+            <div className="relative z-10 mx-auto max-w-7xl px-4 text-center text-white entrance-fade-up">
                 {settings?.hero_title && (
                     <h1 className="mb-6 text-5xl font-bold leading-tight md:text-6xl lg:text-7xl" style={{ fontFamily: "'Manrope', sans-serif" }}>
                         {settings.hero_title}
                     </h1>
                 )}
                 {settings?.hero_subtitle && (
-                    <p className="mx-auto max-w-3xl text-xl text-white md:text-2xl" style={{ fontFamily: "'Myriad Pro', 'Segoe UI', Helvetica, Arial, sans-serif" }}>
+                    <p className="mx-auto max-w-5xl text-xl text-white md:text-2xl" style={{ fontFamily: "'Myriad Pro', 'Segoe UI', Helvetica, Arial, sans-serif" }}>
                         {settings.hero_subtitle}
                     </p>
                 )}
