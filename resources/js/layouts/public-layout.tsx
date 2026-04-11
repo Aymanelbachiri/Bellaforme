@@ -42,20 +42,20 @@ function Navbar({ divisions, mobileMenuOpen, onToggleMobile, onCloseMobile }: Na
 
     return (
         <header className="sticky top-0 z-50 border-gray-800 bg-black font-[Poppins,sans-serif]">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="flex h-20 items-center justify-between">
+            <div className="w-full px-4 sm:px-6 lg:px-8">
+                <div className="flex h-20 items-center justify-between gap-4">
                     {/* Logo */}
                     <Link href="/" className="flex shrink-0 items-center">
                         <img src="/images/Logo.png" alt="Bella Forme Group" className="h-[3.25rem] w-auto" />
                     </Link>
 
                     {/* Desktop navigation — centered */}
-                    <nav className="hidden flex-1 items-center justify-center gap-4 lg:flex xl:gap-6">
+                    <nav className="hidden flex-1 items-center justify-center gap-3 lg:flex xl:gap-5 2xl:gap-7" style={{ fontSize: 'clamp(0.75rem, 0.9vw, 1rem)' }}>
                         {divisions.map((division) => (
                             <Link
                                 key={division.id}
                                 href={`/${division.slug}`}
-                                className={`whitespace-nowrap text-sm transition-colors hover:text-[#d5ab70] ${isActive(`/${division.slug}`) ? 'font-bold text-[#d5ab70]' : 'font-normal text-white'}`}
+                                className={`whitespace-nowrap transition-colors hover:text-[#d5ab70] ${isActive(`/${division.slug}`) ? 'font-bold text-[#d5ab70]' : 'font-normal text-white'}`}
                             >
                                 {division.name}
                             </Link>
@@ -64,13 +64,13 @@ function Navbar({ divisions, mobileMenuOpen, onToggleMobile, onCloseMobile }: Na
                             href="https://bellaforme.academy"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="whitespace-nowrap text-sm font-normal text-white transition-colors hover:text-[#d5ab70]"
+                            className="whitespace-nowrap font-normal text-white transition-colors hover:text-[#d5ab70]"
                         >
                             Academy
                         </a>
                         <Link
                             href="/contact"
-                            className={`whitespace-nowrap text-sm transition-colors hover:text-[#d5ab70] ${isActive('/contact') ? 'font-bold text-[#d5ab70]' : 'font-normal text-white'}`}
+                            className={`whitespace-nowrap transition-colors hover:text-[#d5ab70] ${isActive('/contact') ? 'font-bold text-[#d5ab70]' : 'font-normal text-white'}`}
                         >
                             Contactez-nous
                         </Link>
@@ -81,7 +81,8 @@ function Navbar({ divisions, mobileMenuOpen, onToggleMobile, onCloseMobile }: Na
                         href="https://expertfit.ma"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hidden shrink-0 rounded-full bg-white px-5 py-1.5 text-sm font-normal text-black transition-colors glow-btn hover:bg-[#d5ab70] hover:text-white lg:inline-block"
+                        className="hidden shrink-0 rounded-full bg-white px-5 py-1.5 font-normal text-black transition-colors glow-btn hover:bg-[#d5ab70] hover:text-white lg:inline-block"
+                        style={{ fontSize: 'clamp(0.75rem, 0.9vw, 1rem)' }}
                     >
                         Home gym
                     </a>
