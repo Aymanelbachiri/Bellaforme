@@ -60,10 +60,7 @@ export default function ProductShow({ product, seo }: Props) {
                                 {product.name}
                             </h1>
                             {product.description && (
-                                <div
-                                    className="prose prose-invert prose-sm sm:prose-base max-w-none text-white overflow-hidden break-words"
-                                    dangerouslySetInnerHTML={{ __html: product.description }}
-                                />
+                                <ExpandableDescription html={product.description} />
                             )}
 
                             {/* Phone + Devis */}
@@ -337,4 +334,44 @@ function SpecsTable({ specifications }: { specifications: Array<{ label: string;
     );
 }
 
+function ExpandableDescription({ html }: { html: string }) {
+    const [expanded, setExpanded] = useState(false);
+    const [needsExpand, setNeedsExpand] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        if (ref.current) {
+            setNeedsExpand(ref.current.scrollHeight > 160);
+        }
+    }, [html]);
+
+    return (
+        <div className="relative">
+            <div
+                ref={ref}
+                className={`prose prose-invert prose-sm sm:prose-base max-w-none text-white overflow-hidden break-words transition-all duration-300 ${!expanded && needsExpand ? 'max-h-40' : ''}`}
+                dangerouslySetInnerHTML={{ __html: html }}
+            />
+            {needsExpand && !expanded && (
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-center bg-gradient-to-t from-[#1a1a1a] to-transparent pt-10 pb-1">
+                    <button
+                        type="button"
+                        onClick={() => setExpanded(true)}
+                        className="text-sm font-semibold text-[#d5ab70] hover:underline"
+                    >
+                        Lire plus
+                    </button>
+                </div>
+            )}
+            {needsExpand && expanded && (
+                <button
+                    type="button"
+                    onClick={() => setExpanded(false)}
+                    className="mt-2 text-sm font-semibold text-[#d5ab70] hover:underline"
+                >
+                    Lire moins
+                </button>
+            )}
+        </div>
+    );
+}

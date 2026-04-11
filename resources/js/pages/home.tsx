@@ -202,7 +202,7 @@ function DivisionCard({ division, isRight }: { division: Division; isRight: bool
     return (
         <div
             ref={cardRef}
-            className="relative flex min-h-[45vh] sm:min-h-[65vh] items-end overflow-hidden my-2 transition-all duration-[1200ms] ease-out"
+            className="relative flex min-h-[55vh] sm:min-h-[85vh] items-end overflow-hidden my-2 transition-all duration-[1200ms] ease-out"
             style={{
                 opacity: isVisible ? 1 : 0,
                 transform: isVisible ? 'translateY(0)' : 'translateY(60px)',

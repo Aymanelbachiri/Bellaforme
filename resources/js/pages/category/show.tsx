@@ -72,11 +72,11 @@ export default function CategoryShow({ division, category, brands, seo }: Catego
                             Aucun produit trouvé.
                         </div>
                     ) : (
-                        <div className="mx-auto grid w-[75%] grid-cols-1 gap-6 sm:w-full sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
+                        <div className="mx-auto flex w-[75%] flex-wrap justify-center gap-6 sm:w-full sm:gap-8">
                             {products.map((product, index) => (
                                 <div
                                     key={product.id}
-                                    className="entrance-fade-up opacity-0"
+                                    className="entrance-fade-up opacity-0 w-full sm:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)]"
                                     style={{ animationDelay: `${index * 60}ms` }}
                                 >
                                     <ProductCard product={product} />
