@@ -1,5 +1,4 @@
 import { Head, Link } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import OptimizedImage, { getAvifUrl } from '@/components/optimized-image';
 import SeoHead from '@/components/seo-head';
@@ -185,38 +184,6 @@ function BrandCarousel({ title, brands }: { title: string; brands: Brand[] }) {
         return () => cancelAnimationFrame(animId);
     }, []);
 
-    const isManualScrolling = useRef(false);
-
-    const scroll = (direction: 'left' | 'right') => {
-        if (!scrollRef.current || isManualScrolling.current) return;
-        isManualScrolling.current = true;
-        pausedRef.current = true;
-
-        const el = scrollRef.current;
-        const logoWidth = 180 + 8; // minWidth + gap
-        const target = direction === 'right' ? el.scrollLeft + logoWidth : el.scrollLeft - logoWidth;
-        const start = el.scrollLeft;
-        const distance = target - start;
-        const duration = 400;
-        let startTime: number | null = null;
-
-        const animate = (time: number) => {
-            if (!startTime) startTime = time;
-            const elapsed = time - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            // Ease out cubic
-            const ease = 1 - Math.pow(1 - progress, 3);
-            el.scrollLeft = start + distance * ease;
-
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                isManualScrolling.current = false;
-            }
-        };
-        requestAnimationFrame(animate);
-    };
-
     // Duplicate so user can scroll far in both directions
     const items = [...brands, ...brands, ...brands, ...brands];
 
@@ -226,53 +193,35 @@ function BrandCarousel({ title, brands }: { title: string; brands: Brand[] }) {
                 <h2 className="mb-10 text-center text-xl font-poppins font-black text-white uppercase sm:mb-20 sm:text-2xl">{title}</h2>
             </div>
             <div className="bg-[#1a1a1a]">
-                <div className="mx-auto flex max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-                    {/* Prev */}
-                    <button
-                        onClick={() => scroll('left')}
-                        className="shrink-0 pr-4 text-white min-w-[44px] min-h-[44px]"
-                        aria-label="Précédent"
-                    >
-                        <ChevronLeft className="size-10" strokeWidth={3} />
-                    </button>
-
-                    <div className="brand-marquee-wrapper flex-1 overflow-hidden">
-                    <div
-                        ref={scrollRef}
-                        className="scrollbar-hide flex gap-2 overflow-x-auto py-8"
-                        onMouseEnter={() => { pausedRef.current = true; }}
-                        onMouseLeave={() => { pausedRef.current = false; }}
-                    >
-                        {items.map((brand, i) => (
-                            <div
-                                key={`${brand.id}-${i}`}
-                                className="flex shrink-0 items-center justify-center min-w-[120px] sm:min-w-[180px]"
-                                style={{ height: '130px' }}
-                            >
-                                {brand.logo ? (
-                                    <img
-                                        src={`/storage/${brand.logo}`}
-                                        alt={brand.name}
-                                        loading="eager"
-                                        decoding="async"
-                                        className="max-h-28 max-w-[260px] object-contain"
-                                    />
-                                ) : (
-                                    <span className="text-sm font-medium text-gray-400">{brand.name}</span>
-                                )}
-                            </div>
-                        ))}
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="brand-marquee-wrapper overflow-hidden">
+                        <div
+                            ref={scrollRef}
+                            className="scrollbar-hide flex gap-2 overflow-x-auto py-8"
+                            onMouseEnter={() => { pausedRef.current = true; }}
+                            onMouseLeave={() => { pausedRef.current = false; }}
+                        >
+                            {items.map((brand, i) => (
+                                <div
+                                    key={`${brand.id}-${i}`}
+                                    className="flex shrink-0 items-center justify-center min-w-[120px] sm:min-w-[180px]"
+                                    style={{ height: '130px' }}
+                                >
+                                    {brand.logo ? (
+                                        <img
+                                            src={`/storage/${brand.logo}`}
+                                            alt={brand.name}
+                                            loading="eager"
+                                            decoding="async"
+                                            className="max-h-28 max-w-[260px] object-contain"
+                                        />
+                                    ) : (
+                                        <span className="text-sm font-medium text-gray-400">{brand.name}</span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    </div>
-
-                    {/* Next */}
-                    <button
-                        onClick={() => scroll('right')}
-                        className="shrink-0 pl-4 text-white min-w-[44px] min-h-[44px]"
-                        aria-label="Suivant"
-                    >
-                        <ChevronRight className="size-10" strokeWidth={3} />
-                    </button>
                 </div>
             </div>
         </section>
