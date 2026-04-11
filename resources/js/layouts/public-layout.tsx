@@ -43,14 +43,14 @@ function Navbar({ divisions, mobileMenuOpen, onToggleMobile, onCloseMobile }: Na
     return (
         <header className="sticky top-0 z-50 border-gray-800 bg-black font-[Poppins,sans-serif]">
             <div className="w-full px-4 sm:px-6 lg:px-8">
-                <div className="flex h-20 items-center justify-between gap-4">
+                <div className="flex h-24 items-center justify-between gap-4">
                     {/* Logo */}
                     <Link href="/" className="flex shrink-0 items-center">
-                        <img src="/images/Logo.png" alt="Bella Forme Group" className="h-[3.25rem] w-auto" />
+                        <img src="/images/Logo.png" alt="Bella Forme Group" className="h-16 w-auto" />
                     </Link>
 
                     {/* Desktop navigation — centered */}
-                    <nav className="hidden flex-1 items-center justify-center gap-3 lg:flex xl:gap-5 2xl:gap-7" style={{ fontSize: 'clamp(0.75rem, 0.9vw, 1rem)' }}>
+                    <nav className="hidden flex-1 items-center justify-center lg:flex" style={{ fontSize: 'clamp(0.9rem, 1.15vw, 1.35rem)', gap: 'clamp(1rem, 1.8vw, 2.5rem)' }}>
                         {divisions.map((division) => (
                             <Link
                                 key={division.id}
@@ -81,8 +81,8 @@ function Navbar({ divisions, mobileMenuOpen, onToggleMobile, onCloseMobile }: Na
                         href="https://expertfit.ma"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hidden shrink-0 rounded-full bg-white px-5 py-1.5 font-normal text-black transition-colors glow-btn hover:bg-[#d5ab70] hover:text-white lg:inline-block"
-                        style={{ fontSize: 'clamp(0.75rem, 0.9vw, 1rem)' }}
+                        className="hidden shrink-0 rounded-full bg-white px-6 py-2 font-normal text-black transition-colors glow-btn hover:bg-[#d5ab70] hover:text-white lg:inline-block"
+                        style={{ fontSize: 'clamp(0.9rem, 1.15vw, 1.35rem)' }}
                     >
                         Home gym
                     </a>
