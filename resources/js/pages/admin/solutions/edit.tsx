@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FileIcon, ImageIcon, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, FileIcon, ImageIcon, Plus, Trash2 } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import InputError from '@/components/input-error';
 import { MediaPicker, useMediaPicker } from '@/components/media-picker';
@@ -137,6 +137,29 @@ export default function SolutionsEdit({ settings, seo }: { settings: SolutionsSe
         setBrochureNames((prev) => reindex(prev));
     }
 
+    function moveSolution(from: number, to: number) {
+        if (to < 0 || to >= data.sections.length) return;
+        const swap = (record: Record<number, any>) => {
+            const result = { ...record };
+            const tmp = result[from];
+            result[from] = result[to];
+            result[to] = tmp;
+            if (result[from] === undefined) delete result[from];
+            if (result[to] === undefined) delete result[to];
+            return result;
+        };
+        const newSections = [...data.sections];
+        [newSections[from], newSections[to]] = [newSections[to], newSections[from]];
+        setData((prev) => ({
+            ...prev,
+            sections: newSections,
+            section_images: swap(prev.section_images),
+            section_brochures: swap(prev.section_brochures),
+        }));
+        setImagePreviews((prev) => swap(prev));
+        setBrochureNames((prev) => swap(prev));
+    }
+
     function removeBrochure(index: number) {
         const updated = data.sections.map((s, i) => (i === index ? { ...s, brochure: '' } : s));
         setData('sections', updated);
@@ -205,7 +228,15 @@ export default function SolutionsEdit({ settings, seo }: { settings: SolutionsSe
                             {data.sections.map((item, index) => (
                                 <div key={index} className="rounded-lg border p-4 space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium">Catalogue {index + 1}</span>
+                                        <div className="flex items-center gap-1">
+                                            <Button type="button" variant="ghost" size="icon" className="h-7 w-7" disabled={index === 0} onClick={() => moveSolution(index, index - 1)}>
+                                                <ArrowUp className="h-4 w-4" />
+                                            </Button>
+                                            <Button type="button" variant="ghost" size="icon" className="h-7 w-7" disabled={index === data.sections.length - 1} onClick={() => moveSolution(index, index + 1)}>
+                                                <ArrowDown className="h-4 w-4" />
+                                            </Button>
+                                            <span className="text-sm font-medium ml-1">Catalogue {index + 1}</span>
+                                        </div>
                                         <Button type="button" variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => removeSolution(index)}>
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
