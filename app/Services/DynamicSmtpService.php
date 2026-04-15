@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\EmailSetting;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 
 class DynamicSmtpService
 {
@@ -16,7 +17,7 @@ class DynamicSmtpService
     {
         $settings = EmailSetting::first();
 
-        if (!$settings) {
+        if (!$settings || empty($settings->smtp_host)) {
             return false;
         }
 
@@ -28,6 +29,9 @@ class DynamicSmtpService
         Config::set('mail.mailers.smtp.encryption', $settings->encryption === 'none' ? null : $settings->encryption);
         Config::set('mail.from.address', $settings->from_address);
         Config::set('mail.from.name', $settings->from_name);
+
+        // Purge cached mailer so Laravel picks up the new config
+        Mail::purge('smtp');
 
         return true;
     }

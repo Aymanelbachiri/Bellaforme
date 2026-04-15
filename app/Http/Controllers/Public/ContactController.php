@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreContactMessageRequest;
 use App\Mail\ContactFormNotification;
 use App\Models\ContactMessage;
-use App\Models\EmailSetting;
 use App\Models\SeoMetadata;
 use App\Services\DynamicSmtpService;
 use Illuminate\Http\Request;
@@ -36,12 +35,14 @@ class ContactController extends Controller
     {
         $contactMessage = ContactMessage::create($request->validated());
 
+        $emailSent = false;
         try {
             $smtpService = app(DynamicSmtpService::class);
 
             if ($smtpService->configure()) {
                 Mail::to('info@bellaforme.ma')
                     ->send(new ContactFormNotification($contactMessage));
+                $emailSent = true;
             }
         } catch (\Throwable $e) {
             Log::error('Failed to send contact form notification email: ' . $e->getMessage());
