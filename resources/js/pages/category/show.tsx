@@ -169,7 +169,7 @@ function BrandFilter({ brands, selected, onChange }: BrandFilterProps) {
                     <SelectValue placeholder="Filtre par marque" />
                 </SelectTrigger>
                 <SelectContent className="w-[var(--radix-select-trigger-width)] rounded-2xl rounded-t-none border border-t-0 border-white/20 bg-[#1a1a1a] text-white data-[side=bottom]:translate-y-0" sideOffset={0} align="end">
-                    <SelectItem value="__all__" className="focus:bg-white focus:text-black">Toutes les marques</SelectItem>
+                    <SelectItem value="__all__" className="focus:bg-white focus:text-black">Filtrer par marque</SelectItem>
                     {brands.map((brand) => (
                         <SelectItem key={brand.id} value={brand.slug} className="focus:bg-white focus:text-black">
                             {brand.name}
