@@ -40,8 +40,7 @@ class ContactController extends Controller
             $smtpService = app(DynamicSmtpService::class);
 
             if ($smtpService->configure()) {
-                $emailSettings = EmailSetting::first();
-                Mail::to($emailSettings->from_address)
+                Mail::to('info@bellaforme.ma')
                     ->send(new ContactFormNotification($contactMessage));
             }
         } catch (\Throwable $e) {
